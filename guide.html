@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Too Soon? Guide: famous blunders and how not to repeat them</title>
+  <meta name="description" content="Seven famous social media blunders, what Too Soon? would have flagged, a crisis checklist, holding statements and a sensitive-days calendar.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📓</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/brand.css">
+  <style>
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; gap: 12px; flex-wrap: wrap; }
+    nav .logo { font-size: 24px; }
+    nav .links { display: flex; gap: 8px; flex-wrap: wrap; }
+    header.hero { padding: 24px 0 36px; border-bottom: 2px solid var(--ink); }
+    .kicker { font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--red); }
+    h1 { font-family: var(--display); font-weight: 800; font-size: clamp(40px, 7vw, 76px); line-height: .95; letter-spacing: -.04em; margin: 10px 0 14px; }
+    .lead { font-size: 19px; color: var(--ink-2); max-width: 60ch; margin: 0; }
+    .toc { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+    .toc a { text-decoration: none; border: 2px solid var(--ink); border-radius: 999px; padding: .35em .9em; font-weight: 700; font-size: 14px; background: var(--card); }
+    .toc a:hover { background: var(--ink); color: var(--paper); }
+    section { padding: 52px 0; border-bottom: 1px solid var(--line); }
+    h2 { font-family: var(--display); font-weight: 800; font-size: clamp(28px, 4vw, 42px); letter-spacing: -.03em; margin: 0 0 8px; }
+    .sub { color: var(--ink-2); margin: 0 0 24px; max-width: 64ch; }
+    .cases { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .case { background: var(--card); border: 2px solid var(--ink); border-radius: 18px; padding: 18px; display: grid; gap: 10px; align-content: start; }
+    .case-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .case-top b { font-family: var(--display); font-size: 20px; }
+    .case-top small { color: var(--ink-3); font-weight: 600; }
+    .case blockquote { margin: 0; background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; font-weight: 600; font-size: 16px; }
+    .case blockquote small { display: block; font-weight: 500; color: var(--ink-3); font-size: 12px; margin-top: 6px; }
+    .case p { margin: 0; font-size: 14px; color: var(--ink-2); }
+    .case .lesson { background: var(--paper); border-left: 4px solid var(--red); padding: 8px 10px; border-radius: 0 8px 8px 0; color: var(--ink); font-weight: 600; }
+    .verdict { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); border-top: 1px dashed var(--line); padding-top: 10px; }
+    .chip { display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 3px 8px; border-radius: 6px; background: var(--ink); color: var(--paper); }
+    .sources { font-size: 12px; color: var(--ink-3); }
+    .sources a { color: var(--blue); font-weight: 600; }
+    .checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; counter-reset: c; max-width: 720px; }
+    .checklist li { background: var(--card); border: 2px solid var(--ink); border-radius: 12px; padding: 12px 14px 12px 52px; position: relative; font-weight: 600; }
+    .checklist li::before { counter-increment: c; content: counter(c); position: absolute; left: 14px; top: 10px; width: 26px; height: 26px; border-radius: 50%; background: var(--red); color: #fff; display: grid; place-items: center; font-family: var(--display); font-weight: 800; }
+    .templates { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .tpl { background: var(--card); border: 2px solid var(--ink); border-radius: 16px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+    .tpl h3 { font-family: var(--display); margin: 0; font-size: 19px; }
+    .tpl p { margin: 0; font-size: 13px; color: var(--ink-2); }
+    .tpl pre { margin: 0; white-space: pre-wrap; font: 600 15px/1.45 var(--body); background: #fff; border: 2px dashed var(--line); border-radius: 10px; padding: 10px 12px; }
+    .donts { max-width: 760px; margin: 22px 0 0; padding: 16px 18px 16px 38px; background: var(--red-soft); border: 2px solid var(--red); border-radius: 14px; }
+    .donts li { margin: 4px 0; }
+    table { width: 100%; border-collapse: collapse; background: var(--card); border: 2px solid var(--ink); border-radius: 14px; overflow: hidden; }
+    th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
+    th { background: var(--paper-2); font-family: var(--display); }
+    tr.soon td { background: #fff6f3; font-weight: 700; }
+    .rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .rules div { background: var(--card); border: 2px solid var(--ink); border-radius: 14px; padding: 14px; font-size: 14px; color: var(--ink-2); }
+    .rules div p { margin: 10px 0 0; }
+    footer { padding: 28px 0 40px; color: var(--ink-3); font-size: 13px; }
+    @media (max-width: 760px) { .cases, .templates, .rules { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="/">Too Soon<span class="q">?</span></a>
+      <div class="links"><a class="btn ghost small" href="/app.html">Open the app</a></div>
+    </nav>
+    <header class="hero">
+      <div class="kicker">The Too Soon? Guide</div>
+      <h1>Every brand thinks it won’t happen to them.</h1>
+      <p class="lead">Seven famous posts that went out at exactly the wrong moment, what Too Soon? would have flagged, and what to do when the news turns on your calendar.</p>
+      <div class="toc">
+        <a href="#cases">Case files</a><a href="#checklist">Crisis checklist</a><a href="#statements">Holding statements</a><a href="#days">Sensitive days</a><a href="#verdicts">How verdicts work</a>
+      </div>
+    </header>
+
+    <section id="cases">
+      <h2>Case files</h2>
+      <p class="sub">Each post below runs through the same rules that check your queue, live, right on this page. Real posts from real brands, with the reporting linked. We pick on them because they’re famous, not because anyone’s perfect.</p>
+      <div class="cases" id="caseList"></div>
+    </section>
+
+    <section id="checklist">
+      <h2>When something breaks: the checklist</h2>
+      <p class="sub">The first hour matters most. In the app, “Go dark” does step one for you.</p>
+      <ol class="checklist" id="checklistList"></ol>
+    </section>
+
+    <section id="statements">
+      <h2>Holding statements</h2>
+      <p class="sub">Short, plain, and about the people affected. Fill in the brackets. In the app you can send these straight to your Buffer drafts.</p>
+      <div class="templates" id="tplList"></div>
+      <ul class="donts" id="dontList"></ul>
+    </section>
+
+    <section id="days">
+      <h2>Sensitive days: the next 30 days</h2>
+      <p class="sub">Days when sales, jokes and mascots get called out. Too Soon? checks posts scheduled on these dates automatically.</p>
+      <div id="dayTable"></div>
+    </section>
+
+    <section id="verdicts">
+      <h2>How verdicts work</h2>
+      <div class="rules">
+        <div><span class="stamp too_soon">Too soon</span><p>A named person or place is in tragic news, your wording echoes a tragedy, a promo lands on a day of remembrance, or the link or date is broken.</p></div>
+        <div><span class="stamp look">Give it a look</span><p>Probably fine, but a human should glance: a weather alert where you are, a developing story, a tribute post on a solemn day.</p></div>
+        <div><span class="stamp good">You’re good</span><p>Nothing in today’s news, the calendar or the post itself raises a flag. Post away.</p></div>
+      </div>
+    </section>
+  </div>
+  <footer><div class="wrap">Too Soon? is a <a href="https://nobody-creative.netlify.app" target="_blank" rel="noopener">Nobody Creative</a> thing. Not affiliated with Buffer or with any brand named in this guide.</div></footer>
+
+  <script src="/js/rules.js"></script>
+  <script src="/js/calendar.js"></script>
+  <script src="/js/cases.js"></script>
+  <script src="/js/templates.js"></script>
+  <script>
+    (function () {
+      const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const LABEL = { too_soon: 'Too soon', look: 'Give it a look', good: 'You’re good' };
+
+      document.getElementById('caseList').innerHTML = TooSoonCases.CASES.map(c => {
+        const r = TooSoonCases.replay(c, TooSoonRules, TooSoonCalendar);
+        return `<article class="case" id="case-${esc(c.id)}">
+          <div class="case-top"><b>${esc(c.brand)}</b><small>${esc(c.date)} · ${esc(c.channel)}</small></div>
+          <blockquote>“${esc(c.post)}”<small>${esc(c.context)}</small></blockquote>
+          <p>${esc(c.outcome)}</p>
+          <p class="lesson">${esc(c.lesson)}</p>
+          <div class="verdict"><span class="stamp ${r.verdict}">${LABEL[r.verdict]}</span><span>${esc(r.reasons[0] ? r.reasons[0].text : '')}</span></div>
+          <div class="verdict"><span class="chip">Caught by: ${esc(c.feature)}</span></div>
+          <div class="sources">Sources: ${c.sources.map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a>`).join(' · ')}</div>
+        </article>`;
+      }).join('');
+
+      document.getElementById('checklistList').innerHTML = TooSoonTemplates.CHECKLIST.map(x => `<li>${esc(x)}</li>`).join('');
+      document.getElementById('tplList').innerHTML = TooSoonTemplates.TEMPLATES.map(t => `<div class="tpl"><h3>${esc(t.name)}</h3><p>${esc(t.when)}</p><pre>${esc(t.text)}</pre><button class="btn ghost small" type="button" data-copy="${esc(t.text)}">Copy</button></div>`).join('');
+      document.getElementById('dontList').innerHTML = TooSoonTemplates.DONTS.map(x => `<li>${esc(x)}</li>`).join('');
+
+      const days = TooSoonCalendar.upcoming(30);
+      document.getElementById('dayTable').innerHTML = days.length
+        ? `<table><thead><tr><th>When</th><th>Type</th></tr></thead><tbody>${days.map(d => `<tr class="${/^Today|^Tomorrow/.test(d.title) ? 'soon' : ''}"><td>${esc(d.title)}</td><td>${esc(d.source)}</td></tr>`).join('')}</tbody></table>`
+        : '<p class="sub">No sensitive days in the next 30 days. Enjoy it.</p>';
+
+      document.addEventListener('click', async e => {
+        const b = e.target.closest('[data-copy]');
+        if (!b) return;
+        try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = 'Copied ✓'; } catch { window.prompt('Copy this:', b.dataset.copy); }
+        setTimeout(() => { b.textContent = 'Copy'; }, 1600);
+      });
+    })();
+  </script>
+</body>
+</html>

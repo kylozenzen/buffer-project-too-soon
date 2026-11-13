@@ -1,0 +1,49 @@
+/* Too Soon? — shared brand styles */
+:root {
+  --paper: #f6f1e7;
+  --paper-2: #efe7d8;
+  --card: #fffdf8;
+  --ink: #161412;
+  --ink-2: #4a443d;
+  --ink-3: #8a8277;
+  --line: #ded4c2;
+  --red: #e5432b;
+  --red-soft: #fde4de;
+  --amber: #e9a400;
+  --amber-soft: #fdf0cc;
+  --green: #2e8f62;
+  --green-soft: #dcf1e5;
+  --blue: #2b59c3;
+  --radius: 14px;
+  --shadow: 0 1px 0 rgba(22, 20, 18, .06), 0 8px 24px -12px rgba(22, 20, 18, .18);
+  --display: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
+  --body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 15px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.logo { font-family: var(--display); font-weight: 800; letter-spacing: -.03em; display: inline-flex; align-items: baseline; gap: .02em; text-decoration: none; }
+.logo .q { color: var(--red); display: inline-block; transform: rotate(12deg); transform-origin: bottom center; animation: wobble 4s ease-in-out infinite; }
+@keyframes wobble { 0%, 86%, 100% { transform: rotate(12deg); } 90% { transform: rotate(-8deg); } 94% { transform: rotate(18deg); } }
+
+.btn { display: inline-flex; align-items: center; gap: .45em; border: 2px solid var(--ink); background: var(--ink); color: var(--paper); padding: .62em 1.1em; border-radius: 999px; font-weight: 700; text-decoration: none; transition: transform .12s, box-shadow .12s; }
+.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 0 var(--ink); }
+.btn:active { transform: translateY(1px); box-shadow: none; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.red { background: var(--red); border-color: var(--red); color: #fff; }
+.btn.small { padding: .4em .8em; font-size: 13px; }
+.btn[disabled] { opacity: .5; pointer-events: none; }
+
+/* Rubber-stamp verdicts */
+.stamp { display: inline-block; font-family: var(--display); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; font-size: 12px; padding: .28em .6em; border: 2px solid currentColor; border-radius: 6px; transform: rotate(-3deg); white-space: nowrap; }
+.stamp.too_soon { color: var(--red); background: var(--red-soft); }
+.stamp.look { color: #9a6c00; background: var(--amber-soft); }
+.stamp.good { color: var(--green); background: var(--green-soft); }
+.stamp.now { color: var(--blue); background: #e0e8fb; }
+.stamp.late { color: var(--ink-3); background: var(--paper-2); }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

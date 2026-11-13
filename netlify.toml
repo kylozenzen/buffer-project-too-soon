@@ -1,0 +1,17 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# These two are public by design (the client id is sent to every browser for Buffer sign-in,
+# and the allowed origin is just the site's own URL), so secrets scanning skips them.
+# Scanning stays on for real secrets like AI keys.
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "BUFFER_CLIENT_ID,BUFFER_ALLOWED_ORIGINS"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://auth.buffer.com; form-action 'self'; upgrade-insecure-requests"

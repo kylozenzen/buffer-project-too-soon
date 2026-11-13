@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connecting Buffer… — Too Soon?</title>
+  <link rel="stylesheet" href="/css/brand.css">
+  <style>
+    body { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+    .card { background: var(--card); border: 2px solid var(--ink); border-radius: 18px; padding: 28px; max-width: 420px; text-align: center; box-shadow: 8px 8px 0 var(--ink); }
+    h1 { font-family: var(--display); margin: 8px 0; }
+    p { color: var(--ink-2); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <a class="logo" href="/" style="font-size:28px">Too Soon<span class="q">?</span></a>
+    <h1 id="title">Connecting Buffer…</h1>
+    <p id="msg">One second.</p>
+    <p id="actions" hidden><a class="btn" href="/app.html">Back to Too Soon?</a></p>
+  </div>
+  <script src="/js/shared/connection.js"></script>
+  <script src="/js/shared/oauth.js"></script>
+  <script src="/js/config.js"></script>
+  <script>
+    (async () => {
+      const C = await window.TOOSOON_CONFIG_READY;
+      BufferConnection.init({ prefix: C.prefix, clientId: C.BUFFER_CLIENT_ID, tokenEndpoint: C.tokenEndpoint });
+      const r = await BufferOAuth.handleCallback({ prefix: C.prefix, tokenEndpoint: C.tokenEndpoint, clientId: C.BUFFER_CLIENT_ID });
+      if (r.ok) { location.replace(r.returnTo || '/app.html'); return; }
+      document.getElementById('title').textContent = r.reason === 'cancelled' ? 'No worries.' : 'That didn\'t work.';
+      document.getElementById('msg').textContent = r.message;
+      document.getElementById('actions').hidden = false;
+    })();
+  </script>
+</body>
+</html>

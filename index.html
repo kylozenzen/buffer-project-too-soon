@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Too Soon? — Check your Buffer queue against today's news</title>
+  <meta name="description" content="Too Soon? checks your scheduled Buffer posts against today's news, before your post becomes the news.">
+  <meta property="og:title" content="Too Soon?">
+  <meta property="og:description" content="Checks your Buffer queue against today's news, before your post becomes the news.">
+  <meta property="og:image" content="/media/reel-poster.jpg">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😬</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/brand.css">
+  <style>
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; gap: 12px; }
+    nav .logo { font-size: 26px; }
+    nav .links { display: flex; gap: 8px; }
+    .kicker { font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--red); }
+
+    /* hero */
+    .hero { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 44px; align-items: center; padding: 28px 0 56px; }
+    .hero h1 { font-family: var(--display); font-weight: 800; font-size: clamp(56px, 7vw, 96px); line-height: .9; letter-spacing: -.05em; margin: 10px 0 16px; white-space: nowrap; }
+    .hero h1 .q { color: var(--red); display: inline-block; transform: rotate(12deg); animation: wobble 4s ease-in-out infinite; }
+    .hero .sub { font-size: 20px; color: var(--ink-2); margin: 0 0 22px; max-width: 32ch; }
+    .hero .sub b { color: var(--ink); }
+    .ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+    .ctas .btn { font-size: 16px; padding: .75em 1.2em; }
+    .note { font-size: 13px; color: var(--ink-3); margin: 12px 0 0; }
+    .reel { position: relative; margin: 0; background: var(--paper); border: 2px solid var(--ink); border-radius: 22px; box-shadow: 9px 9px 0 var(--ink); overflow: hidden; aspect-ratio: 16 / 9; }
+    .reel video { width: 100%; height: 100%; display: block; object-fit: cover; }
+    .reel-sound { position: absolute; right: 12px; bottom: 12px; border: 2px solid var(--ink); background: var(--card); border-radius: 999px; padding: .4em .85em; font-weight: 700; font-size: 13px; box-shadow: 2px 2px 0 var(--ink); }
+    .reel-sound:hover { background: var(--ink); color: var(--paper); }
+
+    .ticker { border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); background: var(--ink); color: var(--paper); overflow: hidden; white-space: nowrap; }
+    .ticker div { display: inline-block; padding: 11px 0; animation: scroll 40s linear infinite; font-family: var(--display); font-weight: 600; font-size: 17px; }
+    .ticker span { margin: 0 26px; }
+    .ticker span::after { content: '✺'; color: var(--red); margin-left: 52px; }
+    @keyframes scroll { to { transform: translateX(-50%); } }
+
+    section { padding: 64px 0; }
+    h2 { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 4vw, 44px); letter-spacing: -.035em; line-height: 1.02; margin: 8px 0 12px; }
+    .lead { color: var(--ink-2); font-size: 17px; margin: 0 0 18px; max-width: 46ch; }
+
+    /* how it works */
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .step { display: flex; gap: 12px; align-items: flex-start; background: var(--card); border: 2px solid var(--ink); border-radius: 16px; padding: 16px; }
+    .step b { font-family: var(--display); font-size: 30px; color: var(--red); line-height: 1; }
+    .step h3 { font-family: var(--display); margin: 0 0 4px; font-size: 18px; }
+    .step p { margin: 0; color: var(--ink-2); font-size: 14px; }
+
+    /* feature rows */
+    .feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: center; padding: 40px 0; }
+    .feature.flip > :first-child { order: 2; }
+    .feature ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; font-size: 15px; color: var(--ink-2); }
+    .feature li::before { content: '→ '; color: var(--red); font-weight: 800; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .chips span { font-size: 12px; font-weight: 700; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 4px 10px; color: var(--ink-2); }
+
+    /* mockup frame */
+    .mock { position: relative; background: var(--card); border: 2px solid var(--ink); border-radius: 20px; box-shadow: 8px 8px 0 var(--ink); padding: 18px; min-height: 300px; overflow: hidden; font-size: 13px; }
+    .mock-bar { display: flex; align-items: center; gap: 6px; margin: -6px 0 14px; }
+    .mock-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+    .mock-bar span { margin-left: 8px; font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em; }
+    .m-card { background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; position: relative; }
+    .m-card small { display: block; color: var(--ink-3); font-size: 11px; margin-bottom: 4px; font-weight: 600; }
+    .m-card p { margin: 0; font-weight: 600; color: var(--ink); }
+    .m-tag { display: inline-block; font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; margin-bottom: 4px; }
+    .m-stamp { position: absolute; right: 10px; top: -10px; font-family: var(--display); font-weight: 800; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border: 2px solid currentColor; border-radius: 5px; padding: 2px 7px; transform: rotate(-4deg); background: #fff; }
+    .m-stamp.red { color: var(--red); background: var(--red-soft); }
+    .m-stamp.amber { color: #9a6c00; background: var(--amber-soft); }
+    .m-stamp.green { color: var(--green); background: var(--green-soft); }
+    .m-reason { margin-top: 6px; font-size: 11px; font-weight: 600; }
+    .m-btn { display: inline-block; font-size: 11px; font-weight: 700; border: 2px solid var(--ink); border-radius: 999px; padding: 3px 9px; background: #fff; }
+    .m-btn.red { background: var(--red); border-color: var(--red); color: #fff; }
+
+    /* M1: reads the room */
+    .m1 { display: grid; grid-template-columns: 1fr 26px 1fr; gap: 10px 0; align-items: center; }
+    .m1 .m-card { animation: m-in 9s infinite both; }
+    .m1 .line { height: 4px; background: repeating-linear-gradient(90deg, var(--red) 0 7px, transparent 7px 12px); transform-origin: left; animation: m-line 9s infinite both; }
+    .m1 .line.amber { background: repeating-linear-gradient(90deg, var(--amber) 0 7px, transparent 7px 12px); }
+    .m1 .m-stamp { animation: m-stamp 9s infinite both; }
+    .m1 .post { transition: border-color .2s; animation: m-border 9s infinite both; }
+    .m1 .post.amberb { animation-name: m-border-amber; }
+    .m1 .row2 { animation-delay: .25s !important; } .m1 .row3 { animation-delay: .5s !important; }
+    @keyframes m-in { 0%, 4% { opacity: 0; transform: translateY(10px); } 10%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+    @keyframes m-line { 0%, 22% { transform: scaleX(0); } 30%, 92% { transform: scaleX(1); } 100% { transform: scaleX(1); opacity: 0; } }
+    @keyframes m-stamp { 0%, 33% { opacity: 0; transform: rotate(-4deg) scale(2.2); } 37% { opacity: 1; transform: rotate(-4deg) scale(.95); } 40%, 92% { opacity: 1; transform: rotate(-4deg) scale(1); } 100% { opacity: 0; } }
+    @keyframes m-border { 0%, 34% { border-color: var(--line); } 38%, 92% { border-color: var(--red); } }
+    @keyframes m-border-amber { 0%, 34% { border-color: var(--line); } 38%, 92% { border-color: var(--amber); } }
+
+    /* M2: fix it in one tap */
+    .m2 .m-card { border-color: var(--red); animation: m2-border 10s infinite; }
+    .m2 .txt { position: relative; height: 40px; margin-top: 2px; }
+    .m2 .txt p { position: absolute; inset: 0; }
+    .m2 .before { animation: m2-before 10s infinite; }
+    .m2 .after { opacity: 0; animation: m2-after 10s infinite; }
+    .m2 .s-red { animation: m2-before 10s infinite; }
+    .m2 .s-green { opacity: 0; animation: m2-after 10s infinite; }
+    .m2 .live { margin-top: 10px; display: flex; gap: 8px; align-items: center; font-size: 11px; font-weight: 600; color: var(--ink-2); border-top: 1px dashed var(--line); padding-top: 8px; }
+    .m2 .lc { font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+    .m2 .swap { position: relative; flex: 1; height: 16px; }
+    .m2 .swap > span { position: absolute; left: 0; top: 0; white-space: nowrap; }
+    .m2 .swap .s-red { color: var(--red); } .m2 .swap .s-green { color: var(--green); }
+    .m2 .acts { margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .m2 .rw { animation: m2-press 10s infinite; }
+    .m2 .caret { display: inline-block; width: 2px; height: 14px; background: var(--ink); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+    .m2 .toast { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); background: var(--ink); color: var(--paper); font-weight: 700; font-size: 12px; padding: 6px 12px; border-radius: 999px; opacity: 0; animation: m2-toast 10s infinite; white-space: nowrap; }
+    @keyframes m2-border { 0%, 48% { border-color: var(--red); } 52%, 100% { border-color: var(--green); } }
+    @keyframes m2-before { 0%, 46% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    @keyframes m2-after { 0%, 50% { opacity: 0; } 54%, 96% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes m2-press { 0%, 26% { transform: none; background: #fff; } 28% { transform: scale(.92); background: var(--paper-2); } 32%, 100% { transform: none; background: #fff; } }
+    @keyframes m2-toast { 0%, 58% { opacity: 0; transform: translate(-50%, 8px); } 62%, 90% { opacity: 1; transform: translate(-50%, 0); } 96%, 100% { opacity: 0; } }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* M3: AI second opinion */
+    .m3 .ai { margin-top: 12px; border-left: 3px solid var(--ink); background: var(--paper); border-radius: 0 10px 10px 0; padding: 10px 12px; }
+    .m3 .ai b { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+    .m3 .ai b i { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 1.4s infinite; }
+    .m3 .line-reveal { overflow: hidden; white-space: nowrap; width: 0; animation: m3-type 9s steps(48) infinite; }
+    .m3 .l2 { animation-name: m3-type2; }
+    .m3 .ai p { margin: 6px 0 0; font-size: 12px; color: var(--ink); }
+    .m3 .thinking { font-size: 11px; color: var(--ink-3); margin-top: 6px; animation: m3-think 9s infinite; }
+    .m3 .flow { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 11px; font-weight: 700; color: var(--ink-2); flex-wrap: wrap; }
+    .m3 .flow span { border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; background: #fff; }
+    @keyframes m3-think { 0%, 12% { opacity: 1; } 16%, 100% { opacity: 0; height: 0; margin: 0; } }
+    @keyframes m3-type { 0%, 14% { width: 0; } 34%, 94% { width: 100%; } 100% { width: 100%; opacity: 0; } }
+    @keyframes m3-type2 { 0%, 38% { width: 0; } 58%, 94% { width: 100%; } 100% { width: 100%; opacity: 0; } }
+    @keyframes pulse { 50% { opacity: .3; } }
+
+    /* M4: go dark */
+    .m4 .banner { background: var(--ink); color: var(--paper); border-radius: 10px; padding: 8px 12px; font-weight: 700; font-size: 12px; margin-bottom: 10px; opacity: 0; animation: m4-banner 10s infinite; }
+    .m4 .list { display: grid; gap: 8px; }
+    .m4 .m-card { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .m4 .m-card p { font-size: 12px; }
+    .m4 .m-card em { font-style: normal; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+    .m4 .m-card em.d { color: var(--green); display: none; }
+    .m4 .m-card { animation: m4-pull 10s infinite; }
+    .m4 .m-card:nth-child(2) { animation-delay: .15s; } .m4 .m-card:nth-child(3) { animation-delay: .3s; } .m4 .m-card:nth-child(4) { animation-delay: .45s; }
+    .m4 .go { position: absolute; right: 18px; top: 16px; animation: m4-press 10s infinite; }
+    @keyframes m4-press { 0%, 26% { transform: none; } 29% { transform: scale(.9); } 33%, 100% { transform: none; } }
+    .m4 .stmt { margin-top: 10px; border: 2px dashed var(--line); border-radius: 10px; padding: 8px 10px; font-size: 12px; color: var(--ink-2); opacity: 0; animation: m4-stmt 10s infinite; }
+    @keyframes m4-pull { 0%, 30% { border-color: var(--line); background: #fff; opacity: 1; } 36%, 90% { border-color: var(--green); background: var(--green-soft); opacity: .75; } 100% { opacity: 1; } }
+    @keyframes m4-banner { 0%, 34% { opacity: 0; transform: translateY(-6px); } 40%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+    @keyframes m4-stmt { 0%, 52% { opacity: 0; } 58%, 92% { opacity: 1; } 100% { opacity: 0; } }
+
+    /* case file */
+    .cf { display: grid; grid-template-columns: 1.1fr .9fr; gap: 28px; align-items: center; background: var(--card); border: 2px solid var(--ink); border-radius: 22px; padding: 28px; box-shadow: 9px 9px 0 var(--amber-soft); }
+    .cf-quote { margin: 0 0 12px; font-family: var(--display); font-weight: 800; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.15; }
+    .cf p { color: var(--ink-2); margin: 0; font-size: 15px; }
+    .cf p a { color: var(--blue); font-weight: 600; }
+    .cf-right { display: grid; gap: 12px; justify-items: start; }
+    .cf-card { background: #fff; border: 2px solid var(--amber); border-radius: 14px; padding: 14px; width: 100%; box-sizing: border-box; }
+    .cf-card p { font-weight: 600; color: var(--ink); margin: 8px 0; }
+    .cf-card .why { font-size: 13px; color: var(--ink-2); border-top: 1px dashed var(--line); padding-top: 8px; }
+
+    /* agencies */
+    .agency { background: var(--red); color: #fff; border-radius: 22px; padding: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; border: 2px solid var(--ink); box-shadow: 9px 9px 0 var(--ink); }
+    .agency h2 { color: #fff; margin-top: 0; }
+    .agency p { margin: 0; font-size: 16px; }
+    .agency ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-weight: 600; font-size: 15px; }
+    .agency li::before { content: '✓  '; }
+
+    .faq { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 32px; }
+    .faq h3 { font-family: var(--display); margin: 0 0 4px; font-size: 17px; }
+    .faq p { margin: 0; color: var(--ink-2); font-size: 14px; }
+    .final { text-align: center; padding: 56px 0 64px; }
+    .final .ctas { justify-content: center; }
+    footer { border-top: 2px solid var(--ink); padding: 20px 0 28px; color: var(--ink-3); font-size: 13px; }
+    footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    footer a { color: inherit; }
+
+    @media (max-width: 860px) {
+      .hero, .feature, .cf, .agency, .faq, .steps { grid-template-columns: 1fr; }
+      .feature.flip > :first-child { order: 0; }
+      .hero h1 { white-space: normal; }
+      section { padding: 44px 0; }
+      .feature { gap: 22px; padding: 24px 0; }
+    }
+    @media (prefers-reduced-motion: reduce) { .mock * { animation-duration: 0s !important; animation-iteration-count: 1 !important; } }
+
+    /* ---------- product stages (real screenshots, styled) ---------- */
+    .stage { position: relative; margin: 0; padding: 34px 28px; border-radius: 26px; background-color: var(--stage, #efe6d6); background-image: radial-gradient(rgba(22,20,18,.09) 1px, transparent 1.4px); background-size: 16px 16px; border: 2px solid var(--ink); }
+    .stage-paper { --stage: #eadfcb; padding: 40px 44px; }
+    .stage-green { --stage: #d6eddf; }
+    .stage-purple { --stage: #e6ddff; }
+    .stage-ink { --stage: #2a2622; background-image: radial-gradient(rgba(255,255,255,.08) 1px, transparent 1.4px); }
+    .stage.tall { padding: 34px 28px 120px; }
+    .shot { position: relative; background: #fffdf8; border: 2px solid var(--ink); border-radius: 14px; box-shadow: 8px 8px 0 var(--ink); overflow: hidden; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+    .stage-ink .shot { box-shadow: 8px 8px 0 var(--red); }
+    .shot img { display: block; width: 100%; height: auto; }
+    .shot.narrow { max-width: 360px; margin: 0 auto; }
+    .tilt-l { transform: rotate(-1.4deg); } .tilt-r { transform: rotate(1.2deg); }
+    .feature:hover .shot, .feature-wide:hover .shot { transform: rotate(0) translateY(-3px); }
+    .shot-bar { display: flex; align-items: center; gap: 6px; padding: 9px 12px; border-bottom: 2px solid var(--ink); background: var(--paper); }
+    .shot-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); border: 1.5px solid var(--ink); }
+    .shot-bar i:first-child { background: var(--red); }
+    .shot-bar span { margin-left: 8px; font: 700 11px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+    .float { position: absolute; left: var(--x, auto); right: var(--rt, auto); top: var(--y, auto); bottom: var(--b, auto); z-index: 2; opacity: 0; }
+    .chip.float, .float.chip { display: inline-block; background: #fff; border: 2px solid var(--ink); border-radius: 999px; padding: 8px 14px; font-weight: 700; font-size: 13px; box-shadow: 3px 3px 0 var(--ink); white-space: nowrap; }
+    .float.chip.green { background: var(--green-soft, #dcf1e5); color: var(--green, #2e8f62); border-color: currentColor; box-shadow: 3px 3px 0 currentColor; }
+    .float.chip.purple { background: #ece4ff; color: #4e36a3; border-color: #6c4ad0; box-shadow: 3px 3px 0 #6c4ad0; }
+    .float.chip.dark { background: var(--ink); color: var(--paper); border-color: var(--paper); box-shadow: 3px 3px 0 var(--red); }
+    .float.chip.strike { color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 2px; }
+    .float.slam { font: 800 22px/1 var(--display); text-transform: uppercase; letter-spacing: .06em; color: var(--red); background: #fff0ec; border: 3px solid var(--red); border-radius: 8px; padding: 8px 14px; transform: rotate(var(--r)); white-space: nowrap; }
+    .float.toast { background: var(--ink); color: var(--paper); border-radius: 12px; padding: 10px 16px; font-weight: 700; font-size: 14px; box-shadow: 4px 4px 0 var(--green, #2e8f62); }
+    .float.flowline { display: flex; gap: 6px; background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 7px; box-shadow: 3px 3px 0 var(--ink); }
+    .float.flowline span { font-size: 11px; font-weight: 700; padding: 5px 8px; border-radius: 8px; background: var(--paper); white-space: nowrap; }
+    .float.flowline span:nth-child(2) { background: #ece4ff; color: #4e36a3; }
+    .float.flowline span:nth-child(3) { background: var(--green-soft, #dcf1e5); color: var(--green, #2e8f62); }
+    .float.badge { width: 62%; height: auto; border: 2px solid var(--ink); border-radius: 12px; box-shadow: 6px 6px 0 var(--ink); transform: rotate(-3deg); }
+    .reveal.in .float { animation: float-in .55s cubic-bezier(.2,.9,.3,1.3) var(--d, .25s) forwards, bob 5s ease-in-out calc(var(--d, .25s) + .6s) infinite; }
+    .reveal.in .float.slam { animation: slam .45s cubic-bezier(.3,1.6,.5,1) var(--d, .3s) forwards; }
+    .reveal.in .float.badge { animation: float-in .6s cubic-bezier(.2,.9,.3,1.3) var(--d) forwards; }
+    @keyframes float-in { from { opacity: 0; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
+    @keyframes slam { from { opacity: 0; scale: 2.2; } to { opacity: 1; scale: 1; } }
+    @keyframes bob { 0%, 100% { opacity: 1; translate: 0 0; } 50% { opacity: 1; translate: 0 -4px; } }
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    .feature-wide { padding: 48px 0 24px; }
+    .wide-head { max-width: 720px; margin: 0 auto 28px; text-align: center; }
+    .chips.center { justify-content: center; margin-top: 26px; }
+    .chips-note { text-align: center; font-size: 13px; color: var(--ink-3); margin: 10px auto 0; max-width: 620px; }
+    @media (max-width: 860px) {
+      .stage, .stage-paper { padding: 26px 16px; }
+      .stage.tall { padding-bottom: 90px; }
+      .float.chip, .float.toast { font-size: 12px; white-space: normal; max-width: 70%; }
+      .float.flowline span { font-size: 10px; padding: 4px 6px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .reveal, .reveal .float { opacity: 1 !important; transform: none; animation: none !important; } .tilt-l, .tilt-r { transform: none; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="/">Too Soon<span class="q">?</span></a>
+      <div class="links"><a class="btn ghost small" href="/guide.html">Guide</a><a class="btn small" href="/app.html">Check my queue</a></div>
+    </nav>
+
+    <header class="hero">
+      <div>
+        <div class="kicker">For anyone with a Buffer queue</div>
+        <h1>Too Soon<span class="q">?</span></h1>
+        <p class="sub">Checks your scheduled posts against today's news, <b>before your post becomes the news.</b></p>
+        <div class="ctas">
+          <a class="btn red" href="/app.html?demo">Try the demo</a>
+          <a class="btn ghost" href="/app.html?connect">Connect Buffer</a>
+        </div>
+        <p class="note">Never publishes or deletes. Free while in beta.</p>
+      </div>
+      <figure class="reel" id="reel">
+        <video id="reelVideo" src="/media/too-soon-reel.mp4" poster="/media/reel-poster.jpg" muted autoplay loop playsinline preload="auto" aria-label="23-second demo of Too Soon? catching a risky scheduled post"></video>
+        <button type="button" class="reel-sound" id="reelSound" aria-pressed="false" title="Plays the full 23 seconds from the top">🔊 Sound on</button>
+      </figure>
+    </header>
+  </div>
+
+  <div class="ticker" aria-hidden="true"><div>
+    <span>"This post was scheduled" isn't a crisis plan</span><span>Your queue doesn't watch the news. We do.</span><span>Double-checking your posts shouldn't take a PR team</span><span>Catch it before your client does</span>
+    <span>"This post was scheduled" isn't a crisis plan</span><span>Your queue doesn't watch the news. We do.</span><span>Double-checking your posts shouldn't take a PR team</span><span>Catch it before your client does</span>
+  </div></div>
+
+  <div class="wrap">
+    <section>
+      <div class="kicker">How it works</div>
+      <h2>Three steps. No apology required.</h2>
+      <div class="steps" style="margin-top:18px">
+        <div class="step"><b>1</b><div><h3>Connect Buffer</h3><p>Sign in once. We load your scheduled posts.</p></div></div>
+        <div class="step"><b>2</b><div><h3>We read the room</h3><p>Every post is checked against today's news and calendar.</p></div></div>
+        <div class="step"><b>3</b><div><h3>Fix the risky ones</h3><p>Rewrite, push back a day, or pull to drafts. One tap.</p></div></div>
+      </div>
+    </section>
+
+    <!-- Feature 1: the whole app, big -->
+    <div class="feature-wide reveal">
+      <div class="wide-head">
+        <div class="kicker">Reads the room</div>
+        <h2>Your news on the left. Your queue on the right.</h2>
+        <p class="lead">Every scheduled post gets a stamp and a plain-English reason that points to the story that triggered it.</p>
+      </div>
+      <figure class="stage stage-paper">
+        <div class="shot"><div class="shot-bar"><i></i><i></i><i></i><span>too soon? · demo</span></div>
+          <img src="/images/product/room.webp" width="2560" height="1440" alt="Too Soon? with today's headlines on the left and a coffee shop's scheduled posts on the right, four stamped too soon with the reason for each" loading="lazy"></div>
+        <span class="float slam" style="--x:62%;--y:-22px;--r:-6deg">Too soon?</span>
+        <span class="float chip" style="--x:-14px;--y:44%;--d:.5s">⚡ Linked to the story that caused it</span>
+        <span class="float chip green" style="--x:auto;--rt:-12px;--y:86%;--d:.9s">✓ Nothing gets posted without you</span>
+      </figure>
+      <div class="chips center"><span>Top headlines</span><span>Severe weather alerts</span><span>People in the news</span><span>Trending searches</span><span>Sensitive days</span><span>Recalls</span><span>Earthquakes</span><span>World disasters</span><span>Your city*</span><span>Your brand in the news*</span></div>
+      <p class="chips-note">*Add your city and brand names in Settings. Everything else is on from the start. Plus checks on your own posts: dead or sold-out links and dates that already passed.</p>
+    </div>
+
+    <!-- Feature 2 -->
+    <div class="feature flip reveal">
+      <div>
+        <div class="kicker">Fix it in one tap</div>
+        <h2>Rewrite it, push it, or pull it.</h2>
+        <p class="lead">No tab-hopping. Every flagged post has the fixes right on it, and nothing is ever deleted.</p>
+        <ul>
+          <li><b>Rewrite</b> right in the card, with a live check as you type</li>
+          <li><b>Push back a day</b> and let the news cycle move on</li>
+          <li><b>Pull to drafts</b>, one post or all of them</li>
+        </ul>
+      </div>
+      <figure class="stage stage-green">
+        <div class="shot tilt-l"><img src="/images/product/fix.webp" width="1648" height="602" alt="A flagged post being rewritten in place; the live check now says you're good" loading="lazy"></div>
+        <span class="float chip strike" style="--x:-10px;--y:-18px">Our new cold brew is on fire 🔥</span>
+        <span class="float toast" style="--x:auto;--rt:-14px;--y:auto;--b:-20px;--d:.8s">Saved to Buffer. Much better. ✓</span>
+      </figure>
+    </div>
+
+    <!-- Feature 3: AI -->
+    <div class="feature reveal">
+      <div>
+        <div class="kicker">Where AI comes in</div>
+        <h2>Rules catch the obvious. AI catches the awkward.</h2>
+        <p class="lead">Fast, free rules check every post first. Then, only for the posts that got flagged, an AI second opinion reads the post next to the headlines, explains the risk in one line, and suggests a rewrite.</p>
+        <ul>
+          <li>Only flagged posts are sent, never your whole queue</li>
+          <li>Claude or Gemini, with your own key (Gemini has a free tier)</li>
+          <li>It suggests; you decide what gets posted</li>
+        </ul>
+      </div>
+      <figure class="stage stage-purple">
+        <div class="shot tilt-r"><img src="/images/product/ai.webp" width="1648" height="560" alt="A flagged post with an AI second opinion explaining the risk and suggesting a fix" loading="lazy"></div>
+        <span class="float chip purple" style="--x:-12px;--y:-20px">✨ Second opinion, on demand</span>
+        <div class="float flowline" style="--x:auto;--rt:-6px;--y:auto;--b:-22px;--d:.7s"><span>All posts → free rules</span><span>Flagged → AI</span><span>You decide</span></div>
+      </figure>
+    </div>
+
+    <!-- Feature 4 -->
+    <div class="feature flip reveal">
+      <div>
+        <div class="kicker">For the bad days</div>
+        <h2>Go dark in one tap.</h2>
+        <p class="lead">When something big happens, pull everything coming up to drafts, get a ready-to-edit holding statement, and ping your team.</p>
+        <ul>
+          <li>Pause the next 24 hours to 7 days, with a restore list</li>
+          <li>Holding statements that check themselves for sales language</li>
+          <li>Slack and Discord alerts when a post turns "too soon"</li>
+        </ul>
+      </div>
+      <figure class="stage stage-ink">
+        <div class="shot narrow tilt-l"><img src="/images/product/dark.webp" width="1268" height="1138" alt="The Go dark dialog listing the next 48 hours of posts, ready to pull to drafts" loading="lazy"></div>
+        <span class="float chip dark" style="--x:auto;--rt:-8px;--y:18%">🌑 5 posts → drafts</span>
+        <span class="float chip" style="--x:-12px;--y:auto;--b:14%;--d:.7s">📝 Holding statement ready</span>
+      </figure>
+    </div>
+
+    <!-- Feature 5: the payoff -->
+    <div class="feature reveal">
+      <div>
+        <div class="kicker">And on the good days</div>
+        <h2>Days without a possible incident.</h2>
+        <p class="lead">When nothing's flagged, you get a safety board, proof of everything it checked, and a badge to brag with. One too-soon post and the counter goes back to zero.</p>
+        <ul>
+          <li>Shows exactly what it read, so "all clear" means something</li>
+          <li>Keeps your record, per client</li>
+          <li>Share the streak as an image, or share the app</li>
+        </ul>
+      </div>
+      <figure class="stage stage-green tall">
+        <div class="shot tilt-r"><img src="/images/product/allclear.webp" width="1656" height="468" alt="The all-clear screen: 23 days without a possible incident, with what was checked" loading="lazy"></div>
+        <img class="float badge" style="--x:auto;--rt:-18px;--y:auto;--b:-8px;--d:.6s" src="/images/product/badge.webp" width="1200" height="630" alt="Shareable badge: 23 days without a possible incident" loading="lazy">
+      </figure>
+    </div>
+
+    <section>
+      <div class="cf">
+        <div>
+          <div class="kicker">Case file · December 7, 2013</div>
+          <h2>Uh-oh, SpaghettiOs.</h2>
+          <blockquote class="cf-quote">“Take a moment to remember #PearlHarbor with us.”</blockquote>
+          <p>Posted with the smiling mascot holding a flag. It became a meme within hours, and the brand deleted it and apologized. <a href="https://www.thedrum.com/news/2013/12/09/spaghettios-apologises-pearlharbor-tweet" target="_blank" rel="noopener">Source</a></p>
+        </div>
+        <div class="cf-right">
+          <div class="cf-card">
+            <span class="stamp look">Give it a look</span>
+            <p>“Take a moment to remember #PearlHarbor with us.”</p>
+            <div class="why">⚠ A brand tribute on Pearl Harbor Remembrance Day: keep it plain, with no product, logo or mascot in the image.</div>
+          </div>
+          <a class="btn" href="/guide.html#cases">Read all 7 case files →</a>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding-top:0">
+      <div class="agency">
+        <div>
+          <h2>Catch it before your client does.</h2>
+          <p>Ten brands' queues means nobody is reading the news for each one. Too Soon? does, every time you open it.</p>
+        </div>
+        <ul>
+          <li>Every Buffer organization checked at once</li>
+          <li>A "how careful" setting per client</li>
+          <li>A saves report to show clients what you caught</li>
+          <li>"Copy for client" heads-ups in plain English</li>
+        </ul>
+      </div>
+    </section>
+
+    <section style="padding-top:0">
+      <h2>Fair questions</h2>
+      <div class="faq" style="margin-top:18px">
+        <div><h3>Will it change my posts?</h3><p>Only when you tap: rewrite, push back a day, or pull to drafts. It never publishes or deletes.</p></div>
+        <div><h3>Where does the news come from?</h3><p>Free public sources: Google News, the National Weather Service, Wikipedia, Google Trends, USGS, GDACS, FDA and CPSC recalls, plus a sensitive-days calendar.</p></div>
+        <div><h3>Is my data sent to AI?</h3><p>Only when you tap “Ask AI,” and only that post plus today's headlines. Your AI key stays in your browser.</p></div>
+        <div><h3>Will it ever be wrong?</h3><p>Sometimes. Every flag shows its reason, and "Not relevant" teaches it what to ignore.</p></div>
+      </div>
+    </section>
+
+    <section class="final">
+      <h2>Check before you wreck.</h2>
+      <div class="ctas">
+        <a class="btn red" href="/app.html?demo">Try the demo</a>
+        <a class="btn ghost" href="/app.html?connect">Connect Buffer</a>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <span>Too Soon? is a <a href="https://nobody-creative.netlify.app" target="_blank" rel="noopener">Nobody Creative</a> thing. · <a href="/guide.html">The Guide</a> · <a href="/story.html">How it's built</a></span>
+      <span>Built on Buffer's API. Not affiliated with Buffer or any news outlet.</span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      // Muted autoplay loop that starts at the product (skips the tweet cold open); Sound on plays from the top.
+      var v = document.getElementById('reelVideo'), btn = document.getElementById('reelSound');
+      var PRODUCT = 7.8;
+      function play() { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+      function toProduct() { if (v.muted && v.currentTime < PRODUCT && v.duration) { try { v.currentTime = PRODUCT; } catch (e) {} } }
+      v.addEventListener('loadedmetadata', function () { toProduct(); play(); });
+      v.addEventListener('timeupdate', toProduct);
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) play(); });
+      if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) play(); else v.pause(); }); }, { threshold: 0.25 }).observe(v);
+      play();
+      btn.addEventListener('click', function () {
+        var on = v.muted;
+        v.muted = !on;
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btn.textContent = on ? '🔇 Sound off' : '🔊 Sound on';
+        if (on) { v.currentTime = 0; play(); } else { toProduct(); }
+      });
+    })();
+  </script>
+  <script>
+    // Reveal feature stages as they scroll in (floats animate once visible).
+    (function () {
+      var els = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); }); return; }
+      var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: 0.2 });
+      els.forEach(function (e) { io.observe(e); });
+    })();
+  </script>
+</body>
+</html>

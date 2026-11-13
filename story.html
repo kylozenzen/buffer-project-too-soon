@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Too Soon? README: the story, the stack and the save</title>
+  <meta name="description" content="How Too Soon? was built: the social media problem behind it, the Buffer sign-in reused from PostIQ, the Buffer GraphQL API, free news sources, the rules engine and the AI second opinion.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/brand.css">
+  <style>
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body, 'Inter', system-ui, sans-serif); line-height: 1.6; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 0 22px; }
+    a { color: var(--blue, #2b5fd9); }
+    code, pre { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; }
+    .top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+    .top nav { display: flex; gap: 8px; }
+
+    /* hero */
+    .hero { padding: 40px 0 30px; position: relative; }
+    .file { display: inline-flex; align-items: center; gap: 8px; font: 700 12px/1 ui-monospace, Menlo, monospace; background: var(--ink); color: var(--paper); padding: 8px 12px; border-radius: 8px; }
+    .file .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); animation: blink 1.2s steps(2) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    .hero h1 { font-family: var(--display); font-weight: 800; font-size: clamp(44px, 8vw, 92px); line-height: .95; letter-spacing: -.045em; margin: 18px 0 14px; }
+    .hero h1 .q { color: var(--red); display: inline-block; animation: wobble 4s ease-in-out infinite; transform-origin: bottom center; }
+    .hero .sub { font-size: clamp(18px, 2.4vw, 22px); color: var(--ink-2); max-width: 640px; margin: 0; }
+    .hero .stamp-big { position: absolute; right: 0; top: 262px; font: 800 26px/1 var(--display); text-transform: uppercase; letter-spacing: .06em; color: var(--red); border: 4px solid var(--red); border-radius: 10px; padding: 10px 16px; background: #fff0ec; transform: rotate(-8deg); animation: slam .5s cubic-bezier(.3, 1.6, .5, 1) .5s both; }
+    @keyframes slam { from { opacity: 0; transform: rotate(-8deg) scale(2.4); } }
+    .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 0; padding: 0; list-style: none; }
+    .toc a { display: inline-block; text-decoration: none; color: var(--ink); font-weight: 700; font-size: 13px; border: 2px solid var(--ink); border-radius: 999px; padding: 6px 12px; background: var(--card); transition: transform .15s, box-shadow .15s; }
+    .toc a:hover { transform: translateY(-2px); box-shadow: 0 3px 0 var(--ink); }
+
+    /* chapters */
+    .chapter { padding: 64px 0 20px; }
+    .kicker { font: 800 12px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--red); }
+    .chapter h2 { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 4.6vw, 48px); letter-spacing: -.035em; line-height: 1.02; margin: 10px 0 14px; }
+    .chapter p.lead { font-size: 19px; color: var(--ink-2); max-width: 700px; }
+    .card { background: var(--card); border: 2px solid var(--ink); border-radius: 18px; box-shadow: 6px 6px 0 var(--ink); padding: 22px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    blockquote.pull { margin: 22px 0; padding: 18px 22px; border-left: 6px solid var(--red); background: var(--card); border-radius: 0 14px 14px 0; font: 600 21px/1.35 var(--display); letter-spacing: -.01em; }
+
+    /* timeline: the problem */
+    .tl { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 22px; }
+    .tl .step { background: var(--card); border: 2px solid var(--ink); border-radius: 14px; padding: 14px 16px; position: relative; }
+    .tl .step small { display: block; font: 700 11px/1 ui-monospace, Menlo, monospace; color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+    .tl .step b { font-family: var(--display); font-size: 18px; }
+    .tl .step.bad { border-color: var(--red); }
+    .tl .step .outcome { margin-top: 10px; font-weight: 700; font-size: 14px; }
+    .swap { position: relative; height: 1.6em; overflow: hidden; }
+    .swap span { position: absolute; left: 0; top: 0; white-space: nowrap; }
+    .swap .a { color: var(--red); animation: swapA 6s infinite; }
+    .swap .b { color: var(--green); animation: swapB 6s infinite; }
+    @keyframes swapA { 0%, 45% { opacity: 1; transform: none; } 50%, 95% { opacity: 0; transform: translateY(-100%); } 100% { opacity: 1; } }
+    @keyframes swapB { 0%, 45% { opacity: 0; transform: translateY(100%); } 50%, 95% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+
+    /* reuse diagram */
+    .reuse { display: grid; grid-template-columns: 1fr 70px 1fr; align-items: center; gap: 10px; margin: 24px 0 10px; }
+    .app-box { border: 2px solid var(--ink); border-radius: 16px; background: var(--card); padding: 16px; box-shadow: 5px 5px 0 var(--ink); }
+    .app-box h3 { font-family: var(--display); margin: 0 0 10px; font-size: 22px; letter-spacing: -.02em; }
+    .app-box.postiq h3 { font-family: Georgia, 'Times New Roman', serif; }
+    .app-box.postiq h3 em { color: #a8321e; font-style: normal; }
+    .module { display: flex; align-items: center; gap: 8px; font: 600 13px/1.2 ui-monospace, Menlo, monospace; padding: 8px 10px; border: 1.5px dashed var(--line); border-radius: 10px; margin-top: 6px; background: var(--paper); }
+    .module.shared { border-style: solid; border-color: var(--ink); background: #fff; }
+    .module .tag { margin-left: auto; font: 800 10px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 5px; background: var(--green-soft, #dcf1e5); color: var(--green, #2e8f62); }
+    .module .tag.new { background: #fff0ec; color: var(--red); }
+    .arrow-flow { position: relative; height: 4px; background: repeating-linear-gradient(90deg, var(--ink) 0 8px, transparent 8px 14px); border-radius: 2px; }
+    .arrow-flow::after { content: ''; position: absolute; right: -4px; top: -6px; border: 8px solid transparent; border-left-color: var(--ink); }
+    .arrow-flow i { position: absolute; top: -5px; width: 14px; height: 14px; border-radius: 50%; background: var(--red); animation: travel 2.2s linear infinite; }
+    .arrow-flow i:nth-child(2) { animation-delay: .73s; } .arrow-flow i:nth-child(3) { animation-delay: 1.46s; }
+    @keyframes travel { from { left: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } to { left: calc(100% - 14px); opacity: 0; } }
+
+    /* oauth steps */
+    .flow { counter-reset: s; list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 10px; }
+    .flow li { counter-increment: s; display: grid; grid-template-columns: 38px 1fr; gap: 12px; align-items: start; background: var(--card); border: 2px solid var(--ink); border-radius: 14px; padding: 12px 14px; }
+    .flow li::before { content: counter(s); width: 34px; height: 34px; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font: 800 16px/1 var(--display); }
+    .flow li b { display: block; }
+    .flow li span { color: var(--ink-2); font-size: 15px; }
+
+    /* architecture */
+    .arch { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; align-items: stretch; margin: 26px 0 8px; position: relative; }
+    .node { border: 2px solid var(--ink); background: var(--card); border-radius: 16px; padding: 14px; position: relative; z-index: 1; box-shadow: 5px 5px 0 var(--ink); }
+    .node h4 { margin: 0 0 6px; font-family: var(--display); font-size: 18px; }
+    .node ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--ink-2); }
+    .node.browser { margin-right: 26px; }
+    .node.netlify { margin: 0 13px; background: #e9f7f6; }
+    .node.buffer { margin-left: 26px; background: #eef9e6; }
+    .pipes { position: absolute; inset: 0; pointer-events: none; }
+    .pipe { position: absolute; top: 50%; height: 3px; background: var(--ink); }
+    .pipe.p1 { left: calc(33.3% - 28px); width: 44px; } .pipe.p2 { left: calc(66.6% - 16px); width: 44px; }
+    .pipe i { position: absolute; top: -5px; width: 12px; height: 12px; border-radius: 50%; background: var(--red); animation: travel 1.6s linear infinite; }
+    .pipe.p2 i { animation-delay: .8s; background: var(--green, #2e8f62); }
+    .sidecars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 18px; }
+    .sidecar { border: 2px dashed var(--ink-3); border-radius: 12px; padding: 10px 12px; font-size: 13px; background: var(--paper); }
+    .sidecar b { display: block; font-size: 14px; }
+
+    /* code */
+    .code { background: #1d1a17; color: #f1eadf; border: 2px solid var(--ink); border-radius: 16px; box-shadow: 6px 6px 0 var(--red); overflow: hidden; margin: 18px 0; }
+    .code .bar { display: flex; gap: 6px; align-items: center; padding: 9px 12px; border-bottom: 1px solid #3a342d; font: 700 11px/1 ui-monospace, Menlo, monospace; color: #a99f92; letter-spacing: .04em; }
+    .code .bar i { width: 10px; height: 10px; border-radius: 50%; background: #4a433b; } .code .bar i:first-child { background: var(--red); }
+    .code .bar span { margin-left: 8px; }
+    .code pre { margin: 0; padding: 16px 18px; font-size: 13px; line-height: 1.6; overflow-x: auto; white-space: pre; }
+    .code .k { color: #ff8f7a; } .code .s { color: #b8e0a2; } .code .c { color: #8a8175; font-style: italic; } .code .f { color: #ffd889; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 18px; }
+    .tabs button { font: 700 13px/1 inherit; font-family: inherit; border: 2px solid var(--ink); background: var(--card); border-radius: 999px; padding: 8px 12px; cursor: pointer; }
+    .tabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+    .tabpanel[hidden] { display: none; }
+    .never { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .never span { font-weight: 700; font-size: 14px; padding: 6px 12px; border-radius: 999px; border: 2px solid var(--green, #2e8f62); color: var(--green, #2e8f62); background: var(--green-soft, #dcf1e5); }
+    .never span.no { border-color: var(--red); color: var(--red); background: #fff0ec; text-decoration: line-through; }
+
+    /* sources */
+    .src { border: 2px solid var(--ink); border-radius: 14px; background: var(--card); padding: 14px; transition: transform .2s; }
+    .src:hover { transform: translateY(-3px) rotate(-.5deg); }
+    .src .ico { font-size: 26px; }
+    .src b { display: block; font-family: var(--display); font-size: 17px; margin: 4px 0 2px; }
+    .src small { color: var(--ink-3); font-size: 13px; }
+    .pill { display: table; font: 800 10px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 5px; margin-top: 8px; background: var(--paper-2); color: var(--ink-2); }
+
+    /* rules → AI funnel */
+    .funnel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 22px; }
+    .funnel div { border: 2px solid var(--ink); border-radius: 14px; padding: 16px; text-align: center; background: var(--card); }
+    .funnel div:nth-child(2) { background: #ece4ff; border-color: #6c4ad0; }
+    .funnel div:nth-child(3) { background: var(--green-soft, #dcf1e5); border-color: var(--green, #2e8f62); }
+    .funnel big { display: block; font: 800 40px/1 var(--display); letter-spacing: -.03em; }
+    .funnel small { color: var(--ink-2); }
+
+    /* taste pass */
+    .lesson { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 2px solid var(--ink); border-radius: 16px; overflow: hidden; margin-top: 12px; background: var(--card); }
+    .lesson > div { padding: 14px 16px; }
+    .lesson .before { background: #fff0ec; border-right: 2px solid var(--ink); }
+    .lesson small { display: block; font: 800 10px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; color: var(--ink-3); }
+    .lesson .before small { color: var(--red); } .lesson .after small { color: var(--green, #2e8f62); }
+
+    /* numbers */
+    .nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
+    .num { border: 2px solid var(--ink); border-radius: 16px; padding: 16px; background: var(--card); box-shadow: 4px 4px 0 var(--ink); }
+    .num big { display: block; font: 800 46px/1 var(--display); letter-spacing: -.04em; }
+    .num span { color: var(--ink-2); font-size: 14px; }
+
+    /* build log */
+    .log { list-style: none; margin: 18px 0 0; padding: 0 0 0 22px; border-left: 3px solid var(--ink); }
+    .log li { position: relative; padding: 0 0 16px 14px; }
+    .log li::before { content: ''; position: absolute; left: -31px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--paper); border: 3px solid var(--ink); }
+    .log li.big::before { background: var(--red); border-color: var(--red); }
+    .log time { font: 700 12px/1 ui-monospace, Menlo, monospace; color: var(--ink-3); }
+    .log p { margin: 2px 0 0; }
+
+    .end { text-align: center; padding: 70px 0 40px; }
+    .end h2 { font-family: var(--display); font-weight: 800; font-size: clamp(32px, 5vw, 52px); letter-spacing: -.035em; margin: 0 0 16px; }
+    footer { border-top: 2px solid var(--ink); padding: 18px 0 30px; font-size: 13px; color: var(--ink-3); }
+
+    /* scroll reveal */
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.2, .8, .2, 1); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    @media (max-width: 760px) {
+      .grid2, .grid3, .tl, .funnel, .nums, .lesson, .sidecars { grid-template-columns: 1fr; }
+      .lesson .before { border-right: 0; border-bottom: 2px solid var(--ink); }
+      .reuse { grid-template-columns: 1fr; } .arrow-flow { transform: rotate(90deg); width: 60px; margin: 24px auto; }
+      .arch { grid-template-columns: 1fr; gap: 26px; } .node.browser, .node.netlify, .node.buffer { margin: 0; } .pipes { display: none; }
+      .hero .stamp-big { position: static; display: inline-block; margin-top: 18px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+      .swap .b { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="logo" href="/" style="font-size:24px;color:var(--ink)">Too Soon<span class="q">?</span></a>
+      <nav><a class="btn ghost small" href="/app.html?demo">Try the demo</a><a class="btn small" href="/app.html?connect">Connect Buffer</a></nav>
+    </header>
+
+    <section class="hero">
+      <span class="file"><span class="dot"></span>README.html</span>
+      <h1>The story, the stack<br>and the save<span class="q">.</span></h1>
+      <p class="sub">How a social media manager’s recurring nightmare became a Buffer app in four days: the problem, the product, the Buffer API, and everything we cut to get it right.</p>
+      <div class="stamp-big" aria-hidden="true">Too soon?</div>
+      <ul class="toc">
+        <li><a href="#why">01 · Why</a></li>
+        <li><a href="#what">02 · What it does</a></li>
+        <li><a href="#postiq">03 · Built on PostIQ</a></li>
+        <li><a href="#api">04 · The Buffer API</a></li>
+        <li><a href="#room">05 · Reading the room</a></li>
+        <li><a href="#taste">06 · The taste pass</a></li>
+        <li><a href="#numbers">07 · By the numbers</a></li>
+      </ul>
+    </section>
+
+    <!-- 01 -->
+    <section class="chapter reveal" id="why">
+      <div class="kicker">01 · Why this exists</div>
+      <h2>Your posts were written last week. The news happened this morning.</h2>
+      <p class="lead">I’ve spent years running social media and PR. I’ve watched too many brands fail to read the room. It’s rarely carelessness. A promo gets written and scheduled days ahead, then something terrible happens and nobody remembers what’s sitting in the queue.</p>
+      <div class="tl">
+        <div class="step"><small>Monday</small><b>Post written</b><p style="margin:6px 0 0;font-size:15px">“Our new cold brew is on fire 🔥” goes into the Buffer queue for Thursday.</p></div>
+        <div class="step"><small>Thursday · 8:00 AM</small><b>News breaks</b><p style="margin:6px 0 0;font-size:15px">A warehouse fire downtown forces nearby families to evacuate.</p></div>
+        <div class="step bad"><small>Thursday · 4:30 PM</small><b>The post goes out</b>
+          <div class="outcome swap"><span class="a">✗ Screenshots. Apology. Meeting.</span><span class="b">✓ Too Soon? held it at 8:05.</span></div></div>
+      </div>
+      <blockquote class="pull">Scheduling tools are great at sending posts on time. Nobody was checking whether the time was still right.</blockquote>
+      <p>There’s a long list of famous examples: SpaghettiOs on Pearl Harbor Day, DiGiorno jumping into a hashtag it hadn’t read, Gap tweeting about a hurricane. Big brands with full teams still got it wrong. Small teams and agencies managing ten clients have even less time to read the news for every one. <a href="/guide.html#cases">The Guide has all 7 case files.</a></p>
+    </section>
+
+    <!-- 02 -->
+    <section class="chapter reveal" id="what">
+      <div class="kicker">02 · What it does</div>
+      <h2>A small but mighty tool that reads the room. Or your queue.</h2>
+      <p class="lead">Open it and you see two columns: today’s news on the left, your scheduled Buffer posts on the right. Every post gets a stamp and a plain-English reason.</p>
+      <div class="grid3" style="margin-top:20px">
+        <div class="card"><div class="stamp too_soon" style="color:var(--red);background:#fff0ec">Too soon</div><p style="margin:12px 0 0">Names someone in tragic news, echoes a disaster (“on fire” next to a fire), or ties a promo to a sensitive day.</p></div>
+        <div class="card"><div class="stamp look" style="color:#9a6a00;background:#fff3d4">Give it a look</div><p style="margin:12px 0 0">Mentions a place under a weather alert, a dead or sold-out link, or a date that will already have passed.</p></div>
+        <div class="card"><div class="stamp good">You’re good</div><p style="margin:12px 0 0">Nothing in today’s news touches it. When the whole queue is clean, you get a “days without a possible incident” board.</p></div>
+      </div>
+      <p style="margin-top:18px">Then you fix it right there: <b>rewrite</b> it with a live check as you type, <b>push it back a day</b>, or <b>pull it to drafts</b>. For a really bad day, <b>Go dark</b> pulls everything coming up to drafts in one tap and helps you write a holding statement. An optional <b>AI second opinion</b> handles the awkward cases the rules can’t judge.</p>
+    </section>
+
+    <!-- 03 -->
+    <section class="chapter reveal" id="postiq">
+      <div class="kicker">03 · Built on PostIQ</div>
+      <h2>Sign in with Buffer, reused instead of rebuilt.</h2>
+      <p class="lead">PostIQ, my calendar companion for Buffer, already had a working “Sign in with Buffer.” For Too Soon? I pulled that connection layer out into shared files and gave it settings, so any of my apps can plug it in. Sign-in took an afternoon instead of a week.</p>
+      <div class="reuse">
+        <div class="app-box postiq">
+          <h3>PostIQ <em>plans.</em></h3>
+          <div class="module shared">buffer-connection.js <span class="tag">proven</span></div>
+          <div class="module shared">oauth (PKCE) <span class="tag">proven</span></div>
+          <div class="module shared">buffer-proxy · buffer-token <span class="tag">proven</span></div>
+          <div class="module">calendar, shelf, plans…</div>
+        </div>
+        <div class="arrow-flow" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="app-box">
+          <h3>Too Soon<span style="color:var(--red)">?</span></h3>
+          <div class="module shared">js/shared/connection.js <span class="tag">shared</span></div>
+          <div class="module shared">js/shared/oauth.js <span class="tag">shared</span></div>
+          <div class="module shared">functions: buffer-proxy · buffer-token <span class="tag">shared</span></div>
+          <div class="module">rules · news · AI · Go dark <span class="tag new">new</span></div>
+        </div>
+      </div>
+      <p>The shared version takes three settings: a storage <code>prefix</code> (so two apps on one browser never mix tokens), the public <code>clientId</code>, and the <code>tokenEndpoint</code>. PostIQ uses <code>prefix: 'postiq'</code>; Too Soon? uses <code>prefix: 'toosoon'</code>.</p>
+
+      <h3 style="font-family:var(--display);font-size:24px;margin:30px 0 0;letter-spacing:-.02em">How the sign-in works</h3>
+      <ol class="flow">
+        <li><div><b>Tap “Sign in with Buffer.”</b><span>The app creates a one-time secret (a PKCE code verifier), keeps it in the browser, and sends only its SHA-256 fingerprint to <code>auth.buffer.com</code>.</span></div></li>
+        <li><div><b>Approve on Buffer’s own page.</b><span>You never type your Buffer password into Too Soon?. Buffer shows exactly what the app is asking for: read posts, edit posts, read your account.</span></div></li>
+        <li><div><b>Buffer sends you back with a code.</b><span><code>/auth/callback.html</code> checks the code matches the request it started, then trades code + verifier for tokens through a tiny Netlify function.</span></div></li>
+        <li><div><b>Tokens stay in your browser.</b><span>No database and no accounts. The access token refreshes on its own using the refresh token. Disconnect deletes both.</span></div></li>
+      </ol>
+      <p style="margin-top:16px">Buffer gave me a <b>public client</b> for this app, so there’s no client secret, and that’s fine: PKCE is built for apps that can’t keep a secret. The client ID lives in a Netlify environment variable and reaches the page through <code>/.netlify/functions/app-config</code>. If a secret is ever issued, <code>buffer-token</code> adds it on the server and the browser never sees it. An API-key option is still there as a fallback.</p>
+    </section>
+
+    <!-- 04 -->
+    <section class="chapter reveal" id="api">
+      <div class="kicker">04 · The Buffer API</div>
+      <h2>One GraphQL endpoint. A short list of careful calls.</h2>
+      <p class="lead">Buffer’s API is GraphQL at <code>api.buffer.com</code>. Too Soon? reads your account, channels and scheduled posts, and changes a post only when you tap a button.</p>
+
+      <div class="arch" aria-label="Architecture: your browser talks to Netlify functions, which talk to Buffer">
+        <div class="pipes" aria-hidden="true"><div class="pipe p1"><i></i></div><div class="pipe p2"><i></i></div></div>
+        <div class="node browser"><h4>🖥 Your browser</h4><ul><li>The whole app: static HTML + JS</li><li>Rules engine runs here, free and instant</li><li>Tokens + settings in localStorage</li></ul></div>
+        <div class="node netlify"><h4>⚡ Netlify functions</h4><ul><li><code>buffer-proxy</code>: passes GraphQL through, with an origin allowlist</li><li><code>buffer-token</code>: OAuth code + refresh exchange</li></ul></div>
+        <div class="node buffer"><h4>🟩 Buffer</h4><ul><li><code>auth.buffer.com</code> for sign-in</li><li><code>api.buffer.com</code> GraphQL for posts</li></ul></div>
+      </div>
+      <div class="sidecars">
+        <div class="sidecar"><b>headlines</b>Free news and alert feeds, merged</div>
+        <div class="sidecar"><b>check-page</b>Opens your links to spot “sold out” or 404s</div>
+        <div class="sidecar"><b>second-opinion</b>Claude or Gemini, flagged posts only</div>
+        <div class="sidecar"><b>notify</b>Slack and Discord alerts</div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Buffer API calls">
+        <button role="tab" aria-selected="true" data-tab="t1">Read the queue</button>
+        <button role="tab" aria-selected="false" data-tab="t2">Pull to drafts</button>
+        <button role="tab" aria-selected="false" data-tab="t3">Push back a day</button>
+        <button role="tab" aria-selected="false" data-tab="t4">Holding statement</button>
+      </div>
+      <div class="code tabpanel" id="t1"><div class="bar"><i></i><i></i><i></i><span>query · scheduled posts, 50 at a time</span></div><pre><span class="k">query</span> <span class="f">P</span>($organizationId: OrganizationId!, $after: String) {
+  posts(first: <span class="s">50</span>, after: $after,
+        input: { organizationId: $organizationId,
+                 filter: { status: [scheduled] } }) {
+    edges { node { id text dueAt channelId
+      assets { ... <span class="k">on</span> ImageAsset { image { altText } } } } }
+    pageInfo { hasNextPage endCursor }
+  }
+}
+<span class="c"># If Buffer rejects the assets part, it retries without it, so the check still runs.</span></pre></div>
+      <div class="code tabpanel" id="t2" hidden><div class="bar"><i></i><i></i><i></i><span>mutation · move a post back to drafts</span></div><pre><span class="k">mutation</span> {
+  editPost(input: { id: <span class="s">"…"</span>, saveToDraft: <span class="s">true</span>, text: <span class="s">"…"</span> }) {
+    <span class="k">...</span> <span class="k">on</span> PostActionSuccess { post { id status } }
+    <span class="k">...</span> <span class="k">on</span> MutationError { message }
+  }
+}
+<span class="c"># Reads the post first; if Buffer asks for the text, it sends it back unchanged.</span></pre></div>
+      <div class="code tabpanel" id="t3" hidden><div class="bar"><i></i><i></i><i></i><span>mutation · same time tomorrow</span></div><pre><span class="k">mutation</span> {
+  editPost(input: { id: <span class="s">"…"</span>,
+    mode: customScheduled,
+    dueAt: <span class="s">"2026-11-14T16:30:00-06:00"</span> }) {   <span class="c"># your local offset</span>
+    <span class="k">...</span> <span class="k">on</span> PostActionSuccess { post { id dueAt } }
+    <span class="k">...</span> <span class="k">on</span> MutationError { message }
+  }
+}</pre></div>
+      <div class="code tabpanel" id="t4" hidden><div class="bar"><i></i><i></i><i></i><span>mutation · a statement waiting in drafts</span></div><pre><span class="k">mutation</span> {
+  createPost(input: { channelId: <span class="s">"…"</span>, text: <span class="s">"We're pausing our regular posts today…"</span>,
+    schedulingType: automatic, mode: addToQueue, saveToDraft: <span class="s">true</span>,
+    metadata: { facebook: { type: post } } }) {   <span class="c"># Facebook needs a post type</span>
+    <span class="k">...</span> <span class="k">on</span> PostActionSuccess { post { id } }
+    <span class="k">...</span> <span class="k">on</span> MutationError { message }
+  }
+}</pre></div>
+      <p style="margin-bottom:4px"><b>The promise, enforced in code:</b></p>
+      <div class="never"><span>Read</span><span>Edit when you tap</span><span>Save to drafts</span><span class="no">Publish</span><span class="no">Delete</span></div>
+    </section>
+
+    <!-- 05 -->
+    <section class="chapter reveal" id="room">
+      <div class="kicker">05 · Reading the room</div>
+      <h2>Free public sources, a rules engine, and AI only where it earns its keep.</h2>
+      <p class="lead">No paid news API and no scraping. Every source is public and free, and they’re merged by one Netlify function (<code>headlines</code>) so the browser makes a single request.</p>
+      <div class="grid3" style="margin-top:18px">
+        <div class="src"><div class="ico">📰</div><b>Top headlines</b><small>Google News RSS, plus searches for your city and brand names</small><div class="pill">on</div></div>
+        <div class="src"><div class="ico">⛈️</div><b>Severe weather</b><small>National Weather Service alerts, by state if you set one</small><div class="pill">on</div></div>
+        <div class="src"><div class="ico">🕯️</div><b>People in the news</b><small>Wikipedia most-read + Wikidata to confirm recent deaths</small><div class="pill">on</div></div>
+        <div class="src"><div class="ico">📈</div><b>Trending searches</b><small>Google Trends, with the headline behind each trend</small><div class="pill">on</div></div>
+        <div class="src"><div class="ico">🌍</div><b>Quakes &amp; disasters</b><small>USGS significant quakes, GDACS orange and red alerts</small><div class="pill">on</div></div>
+        <div class="src"><div class="ico">🥫</div><b>Recalls</b><small>openFDA food enforcement and CPSC product recalls</small><div class="pill">on</div></div>
+        <div class="src"><div class="ico">🗓️</div><b>Sensitive days</b><small>9/11, Pearl Harbor, MLK Day, Memorial Day and more, built in</small><div class="pill">on</div></div>
+        <div class="src"><div class="ico">🔗</div><b>Your links</b><small>Opens each link in your posts to catch 404s and “sold out”</small><div class="pill">on</div></div>
+        <div class="src"><div class="ico">🏷️</div><b>Your words</b><small>Learns your brand names and hashtags from your queue</small><div class="pill">automatic</div></div>
+      </div>
+
+      <h3 style="font-family:var(--display);font-size:24px;margin:34px 0 0;letter-spacing:-.02em">The rules engine (<code>js/rules.js</code>, 255 lines)</h3>
+      <p>Pulls the names, places, handles and hashtags out of each post, then compares them with the headlines. It knows the difference between “Jordan Vale” (a deliberate reference) and a word that happens to appear in a story. It catches <b>tone echoes</b>, like “killer deal” next to a shooting or “blowing up” next to an explosion. It also checks dates that will have passed by post time, places under alerts, sensitive days, duplicate posts and missing alt text. A <b>sensitivity dial</b> (strict, normal, relaxed) can be set per client.</p>
+      <div class="funnel">
+        <div><big>All</big><small>posts go through the free rules, in your browser</small></div>
+        <div><big>Flagged</big><small>posts can go to AI when you tap ✨ Ask AI</small></div>
+        <div><big>You</big><small>decide. AI explains the risk and drafts a rewrite</small></div>
+      </div>
+      <p style="margin-top:16px">The AI second opinion uses Claude Haiku or Gemini Flash. Bring your own key (Gemini has a free tier); it stays in your browser and goes out only with the one post you asked about, plus today’s headlines.</p>
+    </section>
+
+    <!-- 06 -->
+    <section class="chapter reveal" id="taste">
+      <div class="kicker">06 · The taste pass</div>
+      <h2>Funny about posting. Never funny about the news.</h2>
+      <p class="lead">An app about tragedy-adjacent posts can easily become tasteless itself. These are the calls I changed after stepping back, plus a couple of bugs that real data caught.</p>
+      <div class="lesson"><div class="before"><small>Before</small>The demo’s fake news day had a mall shooting.</div><div class="after"><small>After</small>A warehouse fire that forces families to evacuate. Still clearly bad timing for “on fire 🔥,” and nobody dies.</div></div>
+      <div class="lesson"><div class="before"><small>Before</small>A sad trombone played whenever the counter reset.</div><div class="after"><small>After</small>It only plays for light causes, like a dead link or a passed date. Never when the cause is someone’s tragedy.</div></div>
+      <div class="lesson"><div class="before"><small>Before</small>The all-clear card could say “Heaviest story today” next to a smiling coffee mug.</div><div class="after"><small>After</small>The cheerful card never quotes tragic headlines or emergency alerts.</div></div>
+      <div class="lesson"><div class="before"><small>Bug, found in live data</small>A months-old GDACS drought alert listed the United States and Mexico, so “our Mexico City street tacos” got flagged.</div><div class="after"><small>Fixed</small>Droughts and anything older than 10 days are dropped. Alaska freezing-spray warnings and Wikipedia’s non-people (films, ships) are filtered too.</div></div>
+    </section>
+
+    <!-- 07 -->
+    <section class="chapter reveal" id="numbers">
+      <div class="kicker">07 · By the numbers</div>
+      <h2>Small but mighty, measured.</h2>
+      <div class="nums">
+        <div class="num"><big data-count="4">0</big><span>days from first commit to shipped</span></div>
+        <div class="num"><big data-count="9">0</big><span>free public data sources</span></div>
+        <div class="num"><big data-count="0" data-zero>0</big><span>posts published or deleted, by design</span></div>
+        <div class="num"><big data-count="42">0</big><span>test assertions across rules + sources</span></div>
+        <div class="num"><big data-count="7">0</big><span>real brand blunders in the Guide</span></div>
+        <div class="num"><big data-count="0" data-zero>0</big><span>databases or accounts holding your data</span></div>
+      </div>
+
+      <h3 style="font-family:var(--display);font-size:24px;margin:34px 0 0;letter-spacing:-.02em">Build log</h3>
+      <ol class="log">
+        <li class="big"><time>Nov 9</time><p><b>v0.1</b>: two-column checker, rules engine, demo mode, landing page.</p></li>
+        <li><time>Nov 12</time><p>Pull to drafts, push back a day, rewrite in place, location alerts. Free sources: Wikipedia, Trends, USGS, GDACS, FDA, CPSC.</p></li>
+        <li class="big"><time>Nov 12</time><p><b>Sign in with Buffer</b>, using the shared PostIQ connection layer, with settings from Netlify environment variables.</p></li>
+        <li><time>Nov 12</time><p>The Guide with 7 case files, Go dark, holding statements, Slack/Discord alerts, sensitivity dial, all-clients view.</p></li>
+        <li><time>Nov 12</time><p>A 23-second product reel built entirely in code: a canvas drawn frame by frame, captured at 60fps, with a synthesized soundtrack.</p></li>
+        <li class="big"><time>Nov 12</time><p><b>AI second opinion</b> on every flagged post, AI rewrites, bring-your-own key. One 7-step walkthrough.</p></li>
+        <li><time>Nov 12</time><p>All-clear screen with the incident-free streak and share badge. The taste pass. Live-data source cleanup.</p></li>
+      </ol>
+    </section>
+
+    <section class="end reveal">
+      <h2>Check before you wreck.</h2>
+      <p style="color:var(--ink-2);margin:0 0 20px">Try it on a made-up coffee shop, or sign in and check your real queue.</p>
+      <a class="btn red" href="/app.html?demo">Try the demo</a> <a class="btn" href="/app.html?connect">Sign in with Buffer</a>
+    </section>
+
+    <footer>
+      Made by Ben Campbell · <a href="https://nobody-creative.netlify.app">Nobody Creative</a>. Built with Claude as a coding partner. Built on Buffer’s API; not affiliated with Buffer or any news outlet. · <a href="/guide.html">The Guide</a> · <a href="/">Home</a>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      // Tabs for the API calls
+      var tabs = document.querySelectorAll('[data-tab]');
+      tabs.forEach(function (t) {
+        t.addEventListener('click', function () {
+          tabs.forEach(function (o) { o.setAttribute('aria-selected', String(o === t)); document.getElementById(o.dataset.tab).hidden = o !== t; });
+        });
+      });
+      // Reveal chapters, then count the numbers up
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function count(el) {
+        var to = Number(el.dataset.count), t0 = null;
+        if (!to || reduce) { el.textContent = String(to); return; }
+        function step(ts) { if (!t0) t0 = ts; var p = Math.min(1, (ts - t0) / 900); el.textContent = String(Math.round(to * (1 - Math.pow(1 - p, 3)))); if (p < 1) requestAnimationFrame(step); }
+        requestAnimationFrame(step);
+      }
+      var els = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); e.querySelectorAll('[data-count]').forEach(count); }); return; }
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('in');
+          e.target.querySelectorAll('[data-count]').forEach(count);
+          io.unobserve(e.target);
+        });
+      }, { threshold: 0.12 });
+      els.forEach(function (e) { io.observe(e); });
+    })();
+  </script>
+</body>
+</html>
