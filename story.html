@@ -4,8 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Too Soon? README: the story, the stack and the save</title>
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#f6f1e7">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Too Soon?">
+  <meta property="og:title" content="Too Soon?: the story, the stack and the save">
+  <meta property="og:description" content="How a Buffer app that reads the room was built: Sign in with Buffer reused from PostIQ, the Buffer GraphQL API, free news sources, and the taste pass.">
+  <meta property="og:url" content="https://project-too-soon.netlify.app/story.html">
+  <meta property="og:image" content="https://project-too-soon.netlify.app/brand/social/og-card.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Too Soon?: check your queue before your post becomes the news. A screenshot of the app with a Too soon? stamp.">
+  <meta name="twitter:image" content="https://project-too-soon.netlify.app/brand/social/og-card.jpg">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="description" content="How Too Soon? was built: the social media problem behind it, the Buffer sign-in reused from PostIQ, the Buffer GraphQL API, free news sources, the rules engine and the AI second opinion.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -214,8 +229,8 @@
       <h2>A small but mighty tool that reads the room. Or your queue.</h2>
       <p class="lead">Open it and you see two columns: today’s news on the left, your scheduled Buffer posts on the right. Every post gets a stamp and a plain-English reason.</p>
       <div class="grid3" style="margin-top:20px">
-        <div class="card"><div class="stamp too_soon" style="color:var(--red);background:#fff0ec">Too soon</div><p style="margin:12px 0 0">Names someone in tragic news, echoes a disaster (“on fire” next to a fire), or ties a promo to a sensitive day.</p></div>
-        <div class="card"><div class="stamp look" style="color:#9a6a00;background:#fff3d4">Give it a look</div><p style="margin:12px 0 0">Mentions a place under a weather alert, a dead or sold-out link, or a date that will already have passed.</p></div>
+        <div class="card"><div class="stamp too_soon" style="color:var(--red);background:#fff0ec">Too soon</div><p style="margin:12px 0 0">Names someone in tragic news, echoes a disaster (“on fire” next to a fire), ties a promo to a solemn day, or links to a page that’s dead or sold out.</p></div>
+        <div class="card"><div class="stamp look" style="color:#9a6a00;background:#fff3d4">Give it a look</div><p style="margin:12px 0 0">Mentions a place under a weather alert, a developing story, or a tribute post on a solemn day. Probably fine; worth a human glance.</p></div>
         <div class="card"><div class="stamp good">You’re good</div><p style="margin:12px 0 0">Nothing in today’s news touches it. When the whole queue is clean, you get a “days without a possible incident” board.</p></div>
       </div>
       <p style="margin-top:18px">Then you fix it right there: <b>rewrite</b> it with a live check as you type, <b>push it back a day</b>, or <b>pull it to drafts</b>. For a really bad day, <b>Go dark</b> pulls everything coming up to drafts in one tap and helps you write a holding statement. An optional <b>AI second opinion</b> handles the awkward cases the rules can’t judge.</p>
@@ -332,10 +347,12 @@
         <div class="src"><div class="ico">🗓️</div><b>Sensitive days</b><small>9/11, Pearl Harbor, MLK Day, Memorial Day and more, built in</small><div class="pill">on</div></div>
         <div class="src"><div class="ico">🔗</div><b>Your links</b><small>Opens each link in your posts to catch 404s and “sold out”</small><div class="pill">on</div></div>
         <div class="src"><div class="ico">🏷️</div><b>Your words</b><small>Learns your brand names and hashtags from your queue</small><div class="pill">automatic</div></div>
+        <div class="src"><div class="ico">💬</div><b>Bluesky + Reddit chatter</b><small>The last day of public posts about your brand and watch words, summed up in one line</small><div class="pill">best effort</div></div>
       </div>
 
       <h3 style="font-family:var(--display);font-size:24px;margin:34px 0 0;letter-spacing:-.02em">The rules engine (<code>js/rules.js</code>, 255 lines)</h3>
-      <p>Pulls the names, places, handles and hashtags out of each post, then compares them with the headlines. It knows the difference between “Jordan Vale” (a deliberate reference) and a word that happens to appear in a story. It catches <b>tone echoes</b>, like “killer deal” next to a shooting or “blowing up” next to an explosion. It also checks dates that will have passed by post time, places under alerts, sensitive days, duplicate posts and missing alt text. A <b>sensitivity dial</b> (strict, normal, relaxed) can be set per client.</p>
+      <p>When people are criticizing your brand on Bluesky or Reddit, every promo gets a “give it a look” until it cools down; criticism of a watch word flags the posts that mention it. Calm chatter is shown, never flagged.</p>
+      <p>The engine pulls the names, places, handles and hashtags out of each post, then compares them with the headlines. It knows the difference between “Jordan Vale” (a deliberate reference) and a word that happens to appear in a story. It catches <b>tone echoes</b>, like “killer deal” next to a shooting or “blowing up” next to an explosion. It also checks dates that will have passed by post time, places under alerts, sensitive days and broken links, plus tidy-ups like duplicates, character limits and missing alt text. A <b>sensitivity dial</b> (strict, normal, relaxed) can be set per client.</p>
       <div class="funnel">
         <div><big>All</big><small>posts go through the free rules, in your browser</small></div>
         <div><big>Flagged</big><small>posts can go to AI when you tap ✨ Ask AI</small></div>
@@ -348,7 +365,7 @@
     <section class="chapter reveal" id="taste">
       <div class="kicker">06 · The taste pass</div>
       <h2>Funny about posting. Never funny about the news.</h2>
-      <p class="lead">An app about tragedy-adjacent posts can easily become tasteless itself. These are the calls I changed after stepping back, plus a couple of bugs that real data caught.</p>
+      <p class="lead">An app about tragedy-adjacent posts can easily become tasteless itself. These are the calls I changed after stepping back, plus a couple of bugs that real data caught. Everyone also agrees to a short, plain-English note before they start: the news is real, the app is a second set of eyes and not the last, and the final call stays with a human.</p>
       <div class="lesson"><div class="before"><small>Before</small>The demo’s fake news day had a mall shooting.</div><div class="after"><small>After</small>A warehouse fire that forces families to evacuate. Still clearly bad timing for “on fire 🔥,” and nobody dies.</div></div>
       <div class="lesson"><div class="before"><small>Before</small>A sad trombone played whenever the counter reset.</div><div class="after"><small>After</small>It only plays for light causes, like a dead link or a passed date. Never when the cause is someone’s tragedy.</div></div>
       <div class="lesson"><div class="before"><small>Before</small>The all-clear card could say “Heaviest story today” next to a smiling coffee mug.</div><div class="after"><small>After</small>The cheerful card never quotes tragic headlines or emergency alerts.</div></div>
@@ -361,9 +378,9 @@
       <h2>Small but mighty, measured.</h2>
       <div class="nums">
         <div class="num"><big data-count="4">0</big><span>days from first commit to shipped</span></div>
-        <div class="num"><big data-count="9">0</big><span>free public data sources</span></div>
+        <div class="num"><big data-count="10">0</big><span>free public data sources</span></div>
         <div class="num"><big data-count="0" data-zero>0</big><span>posts published or deleted, by design</span></div>
-        <div class="num"><big data-count="42">0</big><span>test assertions across rules + sources</span></div>
+        <div class="num"><big data-count="53">0</big><span>test assertions across rules + sources</span></div>
         <div class="num"><big data-count="7">0</big><span>real brand blunders in the Guide</span></div>
         <div class="num"><big data-count="0" data-zero>0</big><span>databases or accounts holding your data</span></div>
       </div>
@@ -377,6 +394,7 @@
         <li><time>Nov 12</time><p>A 23-second product reel built entirely in code: a canvas drawn frame by frame, captured at 60fps, with a synthesized soundtrack.</p></li>
         <li class="big"><time>Nov 12</time><p><b>AI second opinion</b> on every flagged post, AI rewrites, bring-your-own key. One 7-step walkthrough.</p></li>
         <li><time>Nov 12</time><p>All-clear screen with the incident-free streak and share badge. The taste pass. Live-data source cleanup.</p></li>
+        <li class="big"><time>Nov 13</time><p><b>Bluesky + Reddit chatter</b>, the fine-print agreement, a brand kit, and a final QA pass.</p></li>
       </ol>
     </section>
 

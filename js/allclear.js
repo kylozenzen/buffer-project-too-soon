@@ -63,6 +63,7 @@
       [by('people'), 'person in the news', 'people in the news'],
       [by('recall'), 'product recall', 'product recalls'],
       [by('day'), 'sensitive day', 'sensitive days'],
+      [by('chatter'), 'Bluesky/Reddit chatter check', 'Bluesky/Reddit chatter checks'],
     ].filter(p => p[0] > 0).map(([c, one, many]) => `<b>${c}</b> ${c === 1 ? one : many}`);
     const links = Object.keys(A.state.pageResults || {}).length;
     const list = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}` : parts[0] || 'today’s news';

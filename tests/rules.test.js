@@ -77,3 +77,19 @@ for (const c of Cases.CASES) {
 }
 
 console.log('\nall rules tests passed');
+
+// ---- social chatter ----
+{
+  const hot = { id: 'c1', kind: 'chatter', term: 'Luma Coffee', brand: true, weight: 'controversy', title: 'People are criticizing “Luma Coffee” on Bluesky and Reddit (5 of 9 posts today)' };
+  const calm = { ...hot, id: 'c2', weight: 'neutral', title: '“Luma Coffee” came up 9 times on Bluesky and Reddit today, mostly calm' };
+  const watch = { id: 'c3', kind: 'chatter', term: 'pumpkin latte', brand: false, weight: 'controversy', title: 'People are criticizing “pumpkin latte” on Reddit (4 of 6 posts today)' };
+  const promo = { id: 'p1', text: 'Flash sale! 20% off every bag of beans this weekend only.' };
+  const plain = { id: 'p2', text: 'Meet Sam, our weekend barista. Say hi next time you stop by.' };
+  const latte = { id: 'p3', text: 'The pumpkin latte is back on the menu tomorrow.' };
+  assert.strictEqual(R.checkPost(promo, [hot]).verdict, 'look', 'brand chatter puts promos on hold');
+  assert.strictEqual(R.checkPost(plain, [hot]).verdict, 'good', 'brand chatter leaves non-promo posts alone');
+  assert.strictEqual(R.checkPost(promo, [calm]).verdict, 'good', 'calm chatter never flags');
+  assert.strictEqual(R.checkPost(latte, [watch]).verdict, 'look', 'watch-word chatter flags posts that mention it');
+  assert.strictEqual(R.checkPost(plain, [watch]).verdict, 'good', 'watch-word chatter skips posts without it');
+  console.log('chatter rules ok');
+}

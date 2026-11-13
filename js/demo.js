@@ -44,6 +44,7 @@
       { id: 'h7', kind: 'people', weight: 'tragedy', title: 'Jordan Vale (American singer) has died', source: 'Wikipedia + Wikidata (demo)' },
       { id: 'h8', kind: 'trend', title: '“jordan vale” is trending: Fans gather for candlelight vigil', source: 'Google Trends (demo)' },
       { id: 'h9', kind: 'recall', weight: 'controversy', title: 'Recall: Northfield Dairy recalls oat milk cartons (Class II)', source: 'FDA (demo)' },
+      { id: 'h10', kind: 'chatter', term: 'Luma Coffee', brand: true, weight: 'neutral', title: '“Luma Coffee” came up 6 times on Bluesky and Reddit today, mostly calm', source: 'Bluesky and Reddit · best effort (demo)' },
     ];
 
     const pageResults = {

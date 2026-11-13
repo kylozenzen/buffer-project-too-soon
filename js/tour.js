@@ -108,7 +108,8 @@
     try { seen = !!localStorage.getItem(SEEN); } catch {}
     if (!force && seen) return;
     const wait = () => (A.state.posts.length ? setTimeout(start, 500) : setTimeout(wait, 200));
-    wait();
+    // Never start on top of the agreement: wait until they've said "I get it".
+    (window.TooSoonAgree ? TooSoonAgree.agreed : Promise.resolve()).then(wait);
   }
   const q = new URLSearchParams(location.search);
   if (!q.has('connect')) maybeStart(q.has('tour'));

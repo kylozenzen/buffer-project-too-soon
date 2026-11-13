@@ -212,7 +212,12 @@
 
   // ---------- Alerts ----------
   async function sendDigest() {
-    if (!A.prefs.webhook) { A.toast('Add a Slack or Discord webhook in Settings first.'); return; }
+    if (!A.prefs.webhook) {
+      A.toast('Add a Slack or Discord webhook first. Opening Settings…');
+      $('settingsBtn').click();
+      setTimeout(() => { $('webhookInput').scrollIntoView({ block: 'center' }); $('webhookInput').focus(); }, 150);
+      return;
+    }
     const r = await A.sendAlert(A.summaryText());
     A.toast(r.ok ? 'Summary sent.' : `Couldn’t send: ${r.error || r.status}`);
   }

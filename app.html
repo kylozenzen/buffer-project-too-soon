@@ -4,8 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Too Soon? — Check your queue</title>
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#f6f1e7">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Too Soon?">
+  <meta property="og:title" content="Too Soon? · Check your queue">
+  <meta property="og:description" content="Checks your Buffer queue against today's news, before your post becomes the news.">
+  <meta property="og:url" content="https://project-too-soon.netlify.app/app.html">
+  <meta property="og:image" content="https://project-too-soon.netlify.app/brand/social/og-card.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Too Soon?: check your queue before your post becomes the news. A screenshot of the app with a Too soon? stamp.">
+  <meta name="twitter:image" content="https://project-too-soon.netlify.app/brand/social/og-card.jpg">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="description" content="Checks your Buffer queue against today's news before your post becomes the news.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😬</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,6 +43,7 @@
           <button type="button" data-open="share">Share Too Soon? 🔗</button>
           <hr>
           <button type="button" data-open="tour">Take the tour</button>
+          <button type="button" data-open="fineprint">The fine print</button>
           <button type="button" data-open="statements">Holding statements</button>
           <button type="button" data-open="restore">Restore list</button>
           <button type="button" data-open="saves">Saves report</button>
@@ -89,6 +105,24 @@
       <div id="queueList" class="queue-list"></div>
     </section>
   </main>
+
+  <dialog id="agreeDialog" class="dialog agree-dialog" aria-labelledby="agreeTitle">
+    <div class="dialog-inner">
+      <div class="agree-kicker">The fine print, but readable</div>
+      <h2 id="agreeTitle">Quick gut check before we start.</h2>
+      <ul class="agree-list">
+        <li><span class="agree-ico" aria-hidden="true">🕯️</span><div><b>The news in here is real.</b> Too Soon? pokes fun at brands that posted at the worst possible moment. It never pokes fun at the moment itself. The deaths, disasters and emergencies in your news feed happened to real people, and we treat them that way. (The demo’s news day is made up. The Guide’s brand blunders really happened.)</div></li>
+        <li><span class="agree-ico" aria-hidden="true">👀</span><div><b>It’s a second set of eyes, not the last set.</b> This is a work in progress. It will miss things, and sometimes it will flag a post that’s perfectly fine. Every post still deserves a final read from a human before it goes out.</div></li>
+        <li><span class="agree-ico" aria-hidden="true">👆</span><div><b>You still hold the publish button.</b> Too Soon? suggests; you decide. Using it doesn’t hand off responsibility for what you or your clients post. Think of it as spell-check for timing: great at catching things, but nobody blames spell-check for the email.</div></li>
+      </ul>
+      <label class="agree-check"><input type="checkbox" id="agreeCheck"> <span>I get it. Too Soon? helps me check, and my team and I make the final call on what gets posted.</span></label>
+      <div class="agree-actions">
+        <a class="linkish agree-back" href="/">Take me back</a>
+        <button class="btn red" type="button" id="agreeGo" disabled>Let’s read the room</button>
+      </div>
+      <p class="fine agree-reread-note">We’ll do our best to keep you out of the screenshots. Staying out of them is still a team sport.</p>
+    </div>
+  </dialog>
 
   <dialog id="connectDialog" class="dialog connect-dialog">
     <form method="dialog" class="dialog-inner">
@@ -292,6 +326,7 @@
         <label><input type="checkbox" data-source="recalls"> <b>Recalls</b><span>FDA food recalls and CPSC product recalls</span></label>
         <label><input type="checkbox" data-source="quakes"> <b>Earthquakes</b><span>Significant quakes worldwide (USGS)</span></label>
         <label><input type="checkbox" data-source="gdacs"> <b>World disasters</b><span>Orange and red alerts from GDACS (UN/EU)</span></label>
+        <label><input type="checkbox" data-source="chatter"> <b>Bluesky + Reddit chatter</b><span>Last day of public posts about your brand and watch words. Best effort: Reddit sometimes blocks servers</span></label>
       </fieldset>
       <div class="field">Auto-watching (learned from your queue)
         <div class="auto-chips" id="autoChips"></div>
@@ -324,6 +359,7 @@
   <script src="/js/shared/connection.js"></script>
   <script src="/js/shared/oauth.js"></script>
   <script src="/js/config.js"></script>
+  <script src="/js/agree.js"></script>
   <script src="/js/rules.js"></script>
   <script src="/js/calendar.js"></script>
   <script src="/js/demo.js"></script>

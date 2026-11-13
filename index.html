@@ -4,11 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Too Soon? — Check your Buffer queue against today's news</title>
-  <meta name="description" content="Too Soon? checks your scheduled Buffer posts against today's news, before your post becomes the news.">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#f6f1e7">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Too Soon?">
   <meta property="og:title" content="Too Soon?">
   <meta property="og:description" content="Checks your Buffer queue against today's news, before your post becomes the news.">
-  <meta property="og:image" content="/media/reel-poster.jpg">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😬</text></svg>">
+  <meta property="og:url" content="https://project-too-soon.netlify.app/">
+  <meta property="og:image" content="https://project-too-soon.netlify.app/brand/social/og-card.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Too Soon?: check your queue before your post becomes the news. A screenshot of the app with a Too soon? stamp.">
+  <meta name="twitter:image" content="https://project-too-soon.netlify.app/brand/social/og-card.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="description" content="Too Soon? checks your scheduled Buffer posts against today's news, before your post becomes the news.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -228,6 +240,9 @@
       .stage.tall { padding-bottom: 90px; }
       .float.chip, .float.toast { font-size: 12px; white-space: normal; max-width: 70%; }
       .float.flowline span { font-size: 10px; padding: 4px 6px; }
+      .float[style*="--rt"] { right: 6px !important; }
+      .float[style*="--x:-"] { left: 6px !important; }
+      .float.slam { left: auto !important; right: 10px; font-size: 18px; }
     }
     @media (prefers-reduced-motion: reduce) { .reveal, .reveal .float { opacity: 1 !important; transform: none; animation: none !important; } .tilt-l, .tilt-r { transform: none; } }
   </style>
@@ -287,8 +302,8 @@
         <span class="float chip" style="--x:-14px;--y:44%;--d:.5s">⚡ Linked to the story that caused it</span>
         <span class="float chip green" style="--x:auto;--rt:-12px;--y:86%;--d:.9s">✓ Nothing gets posted without you</span>
       </figure>
-      <div class="chips center"><span>Top headlines</span><span>Severe weather alerts</span><span>People in the news</span><span>Trending searches</span><span>Sensitive days</span><span>Recalls</span><span>Earthquakes</span><span>World disasters</span><span>Your city*</span><span>Your brand in the news*</span></div>
-      <p class="chips-note">*Add your city and brand names in Settings. Everything else is on from the start. Plus checks on your own posts: dead or sold-out links and dates that already passed.</p>
+      <div class="chips center"><span>Top headlines</span><span>Severe weather alerts</span><span>People in the news</span><span>Trending searches</span><span>Sensitive days</span><span>Recalls</span><span>Earthquakes</span><span>World disasters</span><span>Your brand in the news</span><span>Bluesky + Reddit chatter†</span><span>Your city*</span></div>
+      <p class="chips-note">Brand names and watch words are learned from your queue. *Add your city in Settings. †Best effort: Reddit sometimes blocks servers. Plus checks on your own posts: dead or sold-out links and dates that already passed.</p>
     </div>
 
     <!-- Feature 2 -->
@@ -406,7 +421,9 @@
         <div><h3>Will it change my posts?</h3><p>Only when you tap: rewrite, push back a day, or pull to drafts. It never publishes or deletes.</p></div>
         <div><h3>Where does the news come from?</h3><p>Free public sources: Google News, the National Weather Service, Wikipedia, Google Trends, USGS, GDACS, FDA and CPSC recalls, plus a sensitive-days calendar.</p></div>
         <div><h3>Is my data sent to AI?</h3><p>Only when you tap “Ask AI,” and only that post plus today's headlines. Your AI key stays in your browser.</p></div>
-        <div><h3>Will it ever be wrong?</h3><p>Sometimes. Every flag shows its reason, and "Not relevant" teaches it what to ignore.</p></div>
+        <div><h3>Will it ever be wrong?</h3><p>Sometimes, in both directions. It's a work in progress and a second set of eyes, not the last set: a human should still give every post a final read. Every flag shows its reason, and "Not relevant" teaches it what to ignore.</p></div>
+        <div><h3>Isn't this a little dark?</h3><p>We joke about brands that posted at the worst moment, never about the moment itself. The news it reads is real and happened to real people, and the app treats it that way.</p></div>
+        <div><h3>What does it cost?</h3><p>Nothing while it's in beta. The AI second opinion is optional and uses your own key (Gemini has a free tier).</p></div>
       </div>
     </section>
 

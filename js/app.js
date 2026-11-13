@@ -34,8 +34,13 @@
 
   // ---------- prefs ----------
   function loadPrefs() {
-    const defaults = { watch: [], ignore: [], sources: ['wiki', 'trends', 'quakes', 'gdacs', 'recalls'], days: true };
-    try { return { ...defaults, ...JSON.parse(localStorage.getItem(PREFS_STORE) || '{}') }; } catch { return defaults; }
+    const defaults = { watch: [], ignore: [], sources: ['wiki', 'trends', 'quakes', 'gdacs', 'recalls', 'chatter'], days: true, known: ['chatter'] };
+    try {
+      const saved = JSON.parse(localStorage.getItem(PREFS_STORE) || '{}');
+      // New sources start switched on for people who saved settings before they existed.
+      if (Array.isArray(saved.sources) && !(saved.known || []).includes('chatter')) { saved.sources = [...saved.sources, 'chatter']; saved.known = [...(saved.known || []), 'chatter']; }
+      return { ...defaults, ...saved };
+    } catch { return defaults; }
   }
   function savePrefs(p) { try { localStorage.setItem(PREFS_STORE, JSON.stringify(p)); } catch {} }
   let prefs = loadPrefs();
@@ -75,6 +80,12 @@
     if (!token) throw new Error('Not connected');
     const res = await fetch(CFG.proxyEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, query, variables }) });
     const data = await res.json().catch(() => ({}));
+    if (!res.ok && !data.data) {
+      const msg = data.error_description || data.message || (typeof data.error === 'string' ? data.error : '') || data.errors?.[0]?.message;
+      const e = new Error(res.status === 401 || res.status === 403 ? 'Buffer sign-in expired (401)' : `Buffer didn't answer (${res.status}${msg ? `: ${msg}` : ''}). Try again in a moment.`);
+      e.status = res.status; if (res.status === 401 || res.status === 403) e.code = 'REFRESH_FAILED';
+      throw e;
+    }
     if (data.errors?.length && !data.data) {
       const e = new Error(data.errors[0].message || 'Buffer request failed');
       e.code = data.errors[0].code; e.status = data.errors[0].status || res.status;
@@ -262,6 +273,7 @@
     qs.set('sources', (prefs.sources || []).join(','));
     const res = await fetch(`/.netlify/functions/headlines${qs.toString() ? `?${qs}` : ''}`);
     const data = await res.json();
+    state.chatterStatus = (data.sources && data.sources.chatterStatus) || null;
     return data.items || [];
   }
 
@@ -341,7 +353,8 @@
       console.error(err);
       const authish = /token|auth|connect/i.test(err.message) || err.status === 401;
       setSummary(authish ? 'Buffer needs reconnecting' : 'Something went sideways', authish ? 'Your Buffer connection expired or the key was rejected.' : err.message);
-      $('queueList').innerHTML = `<div class="empty"><p>${esc(err.message)}</p><button class="btn small" type="button" data-action="connect">Connect Buffer</button> <button class="btn ghost small" type="button" data-action="demo">Back to demo</button></div>`;
+      const reconnect = err.code === 'REFRESH_FAILED' || /reconnect|unauthori[sz]ed|401|token/i.test(err.message || '');
+      $('queueList').innerHTML = `<div class="empty"><p>${reconnect ? 'Buffer needs you to sign in again. It happens; sign-ins expire.' : `Couldn’t load your queue. ${esc(err.message)}`}</p>${reconnect ? '<button class="btn small" type="button" data-action="connect">Sign in again</button>' : '<button class="btn small" type="button" data-action="retry">Try again</button>'} <button class="btn ghost small" type="button" data-action="demo">Show the demo instead</button></div>`;
     }
   }
 
@@ -452,17 +465,19 @@
     if (state.selected) (state.results[state.selected]?.reasons || []).forEach(r => r.headlineId && linked.add(r.headlineId));
     const flaggedIds = new Set(Object.values(state.results).flatMap(r => r.reasons.map(x => x.headlineId).filter(Boolean)));
     const items = state.headlines.slice(0, 45);
-    $('newsMeta').textContent = state.mode === 'demo' ? 'Demo news day' : `${items.length} items${prefs.area ? ` · ${prefs.city ? `${prefs.city}, ` : ''}${prefs.area}` : ' · US'}`;
+    const cs = state.mode === 'live' && state.chatterStatus;
+    const off = cs ? ['bluesky', 'reddit'].filter(k => cs[k] === 'unavailable').map(k => (k === 'bluesky' ? 'Bluesky' : 'Reddit')) : [];
+    $('newsMeta').textContent = state.mode === 'demo' ? 'Demo news day' : `${items.length} items${prefs.area ? ` · ${prefs.city ? `${prefs.city}, ` : ''}${prefs.area}` : ' · US'}${off.length ? ` · ${off.join(' and ')} didn’t answer today` : ''}`;
     $('newsList').innerHTML = items.map(h => {
       const weight = h.kind === 'alert' ? 'alert' : (h.weight || R.headlineWeight(h.title));
       const localTag = h.local ? '<span class="tag local">Your area</span> ' : '';
-      const kindTag = h.kind === 'mention' ? '<span class="tag mention">Mentions you</span>' : h.kind === 'watch' && h.term ? `<span class="tag watch">${esc(h.term)}</span>` : { people: weight === 'tragedy' ? '<span class="tag heavy">Died</span>' : '<span class="tag people">People</span>', trend: '<span class="tag trend">Trending</span>', recall: '<span class="tag dev">Recall</span>', day: '<span class="tag day">Sensitive day</span>' }[h.kind];
+      const kindTag = h.kind === 'mention' ? '<span class="tag mention">Mentions you</span>' : h.kind === 'watch' && h.term ? `<span class="tag watch">${esc(h.term)}</span>` : { people: weight === 'tragedy' ? '<span class="tag heavy">Died</span>' : '<span class="tag people">People</span>', trend: '<span class="tag trend">Trending</span>', recall: '<span class="tag dev">Recall</span>', day: '<span class="tag day">Sensitive day</span>', chatter: weight === 'controversy' ? '<span class="tag chatter hot">Heated chatter</span>' : '<span class="tag chatter">Chatter</span>' }[h.kind];
       const kindTagFinal = kindTag && h.kind === 'watch' && weight === 'tragedy' ? kindTag + ' <span class="tag heavy">Heavy</span>' : kindTag;
       const tag = localTag + (kindTagFinal || (weight === 'alert' ? '<span class="tag alert">Alert</span>' : weight === 'tragedy' ? '<span class="tag heavy">Heavy</span>' : weight === 'controversy' ? '<span class="tag dev">Developing</span>' : ''));
       const cls = ['news', weight, flaggedIds.has(h.id) ? 'touches' : '', linked.has(h.id) ? 'linked' : ''].join(' ');
       // The whole card opens the story in a new tab (the link stretches over the card).
       const title = h.url ? `<a class="news-link" href="${esc(h.url)}" target="_blank" rel="noopener">${esc(h.title)}<span class="ext" aria-label="opens in a new tab"> ↗</span></a>` : esc(h.title);
-      return `<li class="${cls}" id="news-${esc(h.id)}">${tag}<p>${title}</p><small>${esc(h.source || '')}${h.publishedAt ? ` · ${ago(h.publishedAt)}` : ''}${flaggedIds.has(h.id) ? ' · <b>touches your queue</b>' : ''}</small></li>`;
+      return `<li class="${cls}" id="news-${esc(h.id)}">${tag}<p>${title}</p>${h.kind === 'chatter' && h.sample && weight === 'controversy' ? `<q class="chatter-sample">${esc(h.sample)}</q>` : ''}<small>${esc(h.source || '')}${h.publishedAt ? ` · ${ago(h.publishedAt)}` : ''}${flaggedIds.has(h.id) ? ' · <b>touches your queue</b>' : ''}</small></li>`;
     }).join('') || '<li class="news"><p>No headlines loaded. Your posts were still checked for links and dates.</p></li>';
   }
 
@@ -616,7 +631,7 @@
     d1: { verdict: 'too_soon', reason: 'Calling a product "on fire" the same day families are evacuating from a fire downtown will read as careless, even though it\'s unrelated.', fix: 'Swap the wording, or hold until Monday.', rewrite: 'Our new cold brew is seriously smooth. Grab one before they\'re gone this weekend!' },
     d2: { verdict: 'too_soon', reason: 'Hyping Jordan Vale\'s album hours after news of their death would look like you missed it, or worse, are cashing in.', fix: 'Pull it. If you want to acknowledge it, a short, sincere note works better than a promo.', rewrite: '' },
     d3: { verdict: 'too_soon', reason: 'The ticket page says sold out, so "spots are limited" sends people to a dead end.', fix: 'Point people to the waitlist instead.', rewrite: 'Our Latte Art Throwdown is officially sold out! Join the waitlist and we\'ll save you a spot if one opens up: https://demo.toosoon.app/waitlist' },
-    d4: { verdict: 'too_soon', reason: 'The deal date will already be past when this posts.', fix: 'Update the date, or delete the post.', rewrite: 'Our fall punch card deal is back for one more week. Don\'t miss it.' },
+    d4: { verdict: 'too_soon', reason: 'The deal date will already be past when this posts.', fix: 'Update the date, or pull it to drafts.', rewrite: 'Our fall punch card deal is back for one more week. Don\'t miss it.' },
     d7: { verdict: 'look', reason: 'Harbor County is under a flash flood warning. A cheerful block-party throwback is probably fine, but it may feel off to locals today.', fix: 'Consider moving it a few days.', rewrite: '' },
   };
 
@@ -707,6 +722,7 @@
   function isConnected() { return !!(localStorage.getItem(KEY_STORE) || BufferConnection.hasConnection()); }
 
   async function openConnect() {
+    if (window.TooSoonAgree && !TooSoonAgree.has()) { TooSoonAgree.open(); await TooSoonAgree.agreed; }
     await (window.TOOSOON_CONFIG_READY || Promise.resolve());
     $('oauthBtn').disabled = false;
     $('oauthBtn').textContent = 'Sign in with Buffer';
@@ -766,7 +782,8 @@
     if (fb) { feedback(fb.dataset.feedback, fb.dataset.id); return; }
     const act = e.target.closest('[data-action]');
     if (act?.dataset.action === 'connect') openConnect();
-    if (act?.dataset.action === 'demo') disconnect();
+    if (act?.dataset.action === 'demo') showDemo(false); // keeps the Buffer connection
+    if (act?.dataset.action === 'retry') run();
     const post = e.target.closest('.post[data-id]');
     if (post && !e.target.closest('a,button,textarea,.editor')) {
       state.selected = state.selected === post.dataset.id ? null : post.dataset.id;
@@ -791,6 +808,7 @@
     if (act === 'preview') showDemo(!state.demoClear);
     if (act === 'share') shareApp();
     if (act === 'disconnect') disconnect();
+    if (act === 'fineprint' && window.TooSoonAgree) TooSoonAgree.open(true);
   });
   $('recheckBtn').addEventListener('click', run);
   $('opinionBtn').addEventListener('click', secondOpinion);

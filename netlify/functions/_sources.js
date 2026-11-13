@@ -198,4 +198,92 @@ async function recalls(limit = 8) {
   return out;
 }
 
-module.exports = { wikipedia, googleTrends, earthquakes, gdacs, recalls };
+
+// ---------- Brand chatter: Bluesky + Reddit (best effort) ----------
+// Searches the last day of public posts for each term, keeps only posts that really contain it,
+// counts the critical ones, and returns ONE summary item per term (never a flood of posts).
+// Reddit often refuses requests from cloud servers; when it does, it's skipped quietly.
+const CRITICAL = /\b(boycott(ing)?|scam(med)?|worst|awful|terrible|disgusting|gross|furious|outrag(e|ed|eous)|angry|racist|sexist|lawsuit|sued|suing|refund|food poisoning|got sick|made me sick|recall(ed)?|tone[- ]?deaf|insensitive|offensive|shameful|backlash|ripped? ?off|never (buying|going back|ordering|again)|unfollow(ed|ing)?|cancel+ed|apolog(y|ize|ise|ized|ised))\b/i;
+const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+async function blueskySearch(term, sinceIso) {
+  const qs = `q=${encodeURIComponent(`"${term}"`)}&sort=latest&limit=50&since=${encodeURIComponent(sinceIso)}`;
+  for (const host of ['https://public.api.bsky.app', 'https://api.bsky.app']) {
+    const res = await get(`${host}/xrpc/app.bsky.feed.searchPosts?${qs}`, { headers: { Accept: 'application/json' } }, 6000);
+    if (!res) continue;
+    const j = await res.json().catch(() => null);
+    if (!j || !Array.isArray(j.posts)) continue;
+    return j.posts.map(p => ({
+      text: String((p.record && p.record.text) || ''),
+      at: Date.parse((p.record && p.record.createdAt) || p.indexedAt || '') || 0,
+      url: p.author && p.uri ? `https://bsky.app/profile/${p.author.handle}/post/${String(p.uri).split('/').pop()}` : 'https://bsky.app',
+      where: 'Bluesky',
+    }));
+  }
+  return null; // unavailable
+}
+
+async function redditSearch(term) {
+  const q = encodeURIComponent(`"${term}"`);
+  const res = await get(`https://www.reddit.com/search.json?q=${q}&sort=new&t=day&limit=50&raw_json=1`, { headers: { Accept: 'application/json' } }, 6000);
+  if (res) {
+    const j = await res.json().catch(() => null);
+    const kids = j && j.data && Array.isArray(j.data.children) ? j.data.children : null;
+    if (kids) return kids.map(c => c.data || {}).map(d => ({
+      text: `${d.title || ''} ${d.selftext || ''}`.trim(),
+      at: (Number(d.created_utc) || 0) * 1000,
+      url: d.permalink ? `https://www.reddit.com${d.permalink}` : 'https://www.reddit.com',
+      where: d.subreddit ? `r/${d.subreddit}` : 'Reddit',
+    }));
+  }
+  // Fallback: the search RSS (Atom) feed sometimes answers when JSON doesn't.
+  const rss = await get(`https://www.reddit.com/search.rss?q=${q}&sort=new&t=day&limit=50`, {}, 6000);
+  if (!rss) return null;
+  const xml = await rss.text().catch(() => '');
+  const out = []; const re = /<entry>([\s\S]*?)<\/entry>/gi; let m;
+  while ((m = re.exec(xml))) {
+    const e = m[1];
+    const link = (e.match(/<link[^>]*href="([^"]+)"/i) || [])[1] || 'https://www.reddit.com';
+    const sub = (e.match(/<category[^>]*term="([^"]+)"/i) || [])[1];
+    out.push({ text: `${tagOf(e, 'title')} ${tagOf(e, 'content')}`, at: Date.parse(tagOf(e, 'updated')) || 0, url: link, where: sub ? `r/${sub}` : 'Reddit' });
+  }
+  return xml.includes('<feed') ? out : null;
+}
+
+async function chatter(terms, opts = {}) {
+  const brands = new Set((opts.brands || []).map(t => t.toLowerCase()));
+  const since = new Date(Date.now() - 24 * 3600e3);
+  const status = { bluesky: 'unused', reddit: 'unused' };
+  const out = [];
+  const list = [...new Set(terms.map(t => t.replace(/^[#@]/, '').trim()).filter(t => t.length >= 3))].slice(0, 4);
+  await Promise.all(list.map(async term => {
+    const [bs, rd] = await Promise.all([blueskySearch(term, since.toISOString()), redditSearch(term)]);
+    status.bluesky = bs ? 'ok' : status.bluesky === 'ok' ? 'ok' : 'unavailable';
+    status.reddit = rd ? 'ok' : status.reddit === 'ok' ? 'ok' : 'unavailable';
+    const has = new RegExp(`(^|[^\\p{L}\\p{N}])${esc(term)}($|[^\\p{L}\\p{N}])`, 'iu');
+    const posts = [...(bs || []), ...(rd || [])].filter(p => p.text && has.test(p.text) && (!p.at || p.at >= since.getTime()));
+    if (!posts.length) return;
+    const critical = posts.filter(p => CRITICAL.test(p.text));
+    const where = [...new Set(posts.map(p => (p.where.startsWith('r/') ? 'Reddit' : p.where)))].join(' and ');
+    const hot = critical.length >= 3 && critical.length / posts.length >= 0.25;
+    const sample = (hot ? critical : posts)[0];
+    out.push({
+      id: `chatter-${term.toLowerCase()}`,
+      kind: 'chatter',
+      term,
+      brand: brands.has(term.toLowerCase()),
+      weight: hot ? 'controversy' : 'neutral',
+      title: hot
+        ? `People are criticizing “${term}” on ${where} (${critical.length} of ${posts.length} posts today)`
+        : `“${term}” came up ${posts.length} time${posts.length === 1 ? '' : 's'} on ${where} today, mostly calm`,
+      source: `${where} · best effort`,
+      url: sample ? sample.url : `https://bsky.app/search?q=${encodeURIComponent(term)}`,
+      sample: sample ? sample.text.replace(/\s+/g, ' ').slice(0, 160) : '',
+      publishedAt: new Date().toISOString(),
+      counts: { total: posts.length, critical: critical.length },
+    });
+  }));
+  return { items: out, status };
+}
+
+module.exports = { wikipedia, googleTrends, earthquakes, gdacs, recalls, chatter, CRITICAL };

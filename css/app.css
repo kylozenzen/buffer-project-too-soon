@@ -277,3 +277,27 @@
 @media (max-width: 640px) { .all-clear { grid-template-columns: 1fr; } .ac-sign { max-width: 240px; margin: 0 auto; } }
 @media (prefers-reduced-motion: reduce) { .calm-mug .steam path, .flip.flipping, .calm-mug.pop { animation: none; } }
 .news.skeleton { height: 58px; padding: 10px 12px; }
+
+/* ---------- agreement ---------- */
+.agree-dialog { max-width: 560px; max-height: calc(100dvh - 24px); overflow-y: auto; }
+.agree-dialog .dialog-inner { gap: 14px; padding: 26px; }
+.agree-kicker { font: 800 11px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--red); }
+.agree-dialog h2 { margin: 0; font-family: var(--display); font-size: 28px; line-height: 1.05; letter-spacing: -.03em; }
+.agree-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.agree-list li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); }
+.agree-list b { color: var(--ink); }
+.agree-ico { width: 34px; height: 34px; display: grid; place-items: center; border: 2px solid var(--ink); border-radius: 10px; background: var(--paper); font-size: 17px; }
+.agree-check { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 2px solid var(--ink); border-radius: 12px; background: var(--paper); font-weight: 600; font-size: 14.5px; cursor: pointer; }
+.agree-check input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--red); flex: none; }
+.agree-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.agree-actions .btn:disabled { opacity: .45; cursor: not-allowed; }
+.agree-back { font-size: 14px; color: var(--ink-3); }
+.agree-dialog.reread .agree-back { visibility: hidden; }
+.agree-reread-note { margin: 0; font-size: 12.5px; color: var(--ink-3); text-align: center; }
+@media (max-width: 520px) { .agree-dialog .dialog-inner { padding: 20px 18px; } .agree-dialog h2 { font-size: 24px; } }
+
+/* ---------- social chatter ---------- */
+.tag.chatter { background: #e3efff; color: #1f57c3; }
+.tag.chatter.hot { background: #fff0ec; color: var(--red); }
+.chatter-sample { display: block; margin: 4px 0 2px; font-size: 13px; color: var(--ink-2); font-style: italic; quotes: "“" "”"; }
+.chatter-sample::before { content: open-quote; } .chatter-sample::after { content: close-quote; }

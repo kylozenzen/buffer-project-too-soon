@@ -1,0 +1,10 @@
+{
+  "name": "too-soon-reel",
+  "private": true,
+  "description": "Source for the 23-second Too Soon? reel: a canvas page drawn frame by frame, captured at 60fps, with a synthesized score.",
+  "dependencies": {
+    "@fontsource/bricolage-grotesque": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0"
+  }
+}

@@ -132,6 +132,7 @@
 
     // 1. Post names someone/something that's in heavy news today.
     for (const h of headlines) {
+      if (h.kind === 'chatter') continue; // handled below
       const weight = h.kind === 'alert' ? 'alert' : weigh(h);
       if (weight === 'neutral') continue;
       const hay = `${h.title} ${h.area || ''}`;
@@ -155,6 +156,17 @@
       }
       else if (weight === 'alert') bump(result, 'look', `${label} is under an active alert: ${h.title}`, h);
       else bump(result, 'look', `Mentions ${label}, which is in a developing story: "${h.title}"`, h, true);
+    }
+
+    // 1b. Social chatter (Bluesky + Reddit). Criticism of your brand puts every promo on hold;
+    //     criticism of a watch word flags the posts that mention it.
+    for (const h of headlines) {
+      if (h.kind !== 'chatter' || weigh(h) !== 'controversy' || !h.term || ignore.has(norm(h.term))) continue;
+      if (h.brand) {
+        if (PROMO.test(text)) bump(result, 'look', `People are criticizing ${h.term} ${h.title.replace(/^People are criticizing “[^”]+” /, '')}. A promo may land badly until it cools down.`, h);
+      } else if (containsPhrase(text, norm(h.term))) {
+        bump(result, 'look', `"${h.term}" is getting criticism online right now: ${h.title}`, h);
+      }
     }
 
     // 2. Wording that echoes heavy news.

@@ -8,7 +8,7 @@
 
 const UA = 'TooSoon/0.1 (https://toosoon.netlify.app)';
 const extra = require('./_sources');
-const ALL_SOURCES = ['wiki', 'trends', 'quakes', 'gdacs', 'recalls'];
+const ALL_SOURCES = ['wiki', 'trends', 'quakes', 'gdacs', 'recalls', 'chatter'];
 const TOP_URL = 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
 const SEARCH_URL = q => `https://news.google.com/rss/search?q=${encodeURIComponent(q)}+when:1d&hl=en-US&gl=US&ceid=US:en`;
 const NWS_URL = 'https://api.weather.gov/alerts/active?status=actual&severity=Extreme,Severe';
@@ -118,6 +118,7 @@ exports.handler = async function handler(event) {
     on.has('quakes') ? extra.earthquakes() : none,
     on.has('gdacs') ? extra.gdacs() : none,
     on.has('recalls') ? extra.recalls() : none,
+    on.has('chatter') && (brands.length || keywords.length) ? extra.chatter([...brands, ...keywords], { brands }) : Promise.resolve({ items: [], status: {} }),
   ]);
 
   const [top, alerts, nationalAlerts, local, ...searches] = await Promise.all([
@@ -129,7 +130,7 @@ exports.handler = async function handler(event) {
   ]);
   const mentions = (await Promise.all(brands.map(b => getNews(SEARCH_URL(`"${b}"`), 'mention', 4).then(list => list.map(x => ({ ...x, term: b })))))).flat();
   local.forEach(x => { x.local = true; });
-  const [wiki, trends, quakes, disasters, recalls] = await extras;
+  const [wiki, trends, quakes, disasters, recalls, chat] = await extras;
   const deaths = wiki.filter(x => x.weight === 'tragedy');
   const people = wiki.filter(x => x.weight !== 'tragedy');
 
@@ -138,10 +139,11 @@ exports.handler = async function handler(event) {
     headers: headers(),
     body: JSON.stringify({
       fetchedAt: new Date().toISOString(),
-      items: [...mentions, ...alerts, ...deaths, ...local, ...nationalAlerts, ...quakes, ...disasters, ...searches.flat(), ...top, ...trends, ...recalls, ...people],
+      items: [...chat.items.filter(x => x.weight !== 'neutral'), ...mentions, ...alerts, ...deaths, ...local, ...nationalAlerts, ...quakes, ...disasters, ...searches.flat(), ...top, ...trends, ...recalls, ...people, ...chat.items.filter(x => x.weight === 'neutral')],
       sources: {
         mentions: mentions.length, news: top.length, alerts: alerts.length + nationalAlerts.length, local: local.length, watch: searches.flat().length,
         wikipedia: wiki.length, trends: trends.length, quakes: quakes.length, gdacs: disasters.length, recalls: recalls.length,
+        chatter: chat.items.length, chatterStatus: chat.status,
       },
       area, city,
     }),
